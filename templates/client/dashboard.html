@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Client Dashboard{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <h1>👤 Client Dashboard</h1>
+    <p class="lead">Welcome, {{ current_user.email }}!</p>
+    
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5>📄 My Documents</h5>
+                    <p class="display-6">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5>📅 My Appointments</h5>
+                    <p class="display-6">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5>⚖️ Find Lawyers</h5>
+                    <p class="display-6">-</p>
+                    <a href="#" class="btn btn-primary">Search</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+    </div>
+</div>
+{% endblock %}

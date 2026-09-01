@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <h1>🛡️ Admin Dashboard</h1>
+    <p class="lead">Platform Overview</p>
+    
+    <div class="row mt-4">
+        <div class="col-md-4">
+    <div class="card bg-primary text-white">
+        <div class="card-body">
+            <h5>Total Users</h5>
+            <p class="display-4">{{ total_users }}</p>
+        </div>
+    </div>
+</div>
+<div class="col-md-4">
+    <div class="card bg-success text-white">
+        <div class="card-body">
+            <h5>Total Clients</h5>
+            <p class="display-4">{{ total_clients }}</p>
+        </div>
+    </div>
+</div>
+<div class="col-md-4">
+    <div class="card bg-info text-white">
+        <div class="card-body">
+            <h5>Total Lawyers</h5>
+            <p class="display-4">{{ total_lawyers }}</p>
+        </div>
+    </div>
+</div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+    </div>
+</div>
+{% endblock %}
