@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">👥 Manage Users</h1>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Name</th>
+                    <th>Approved</th>
+                    <th>Blacklisted</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <span class="badge bg-{{ 'primary' if user.role == 'client' else 'success' if user.role == 'lawyer' else 'danger' }}">
+                            {{ user.role.title() }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if user.role == 'client' %}
+                            {{ user.client_profile.name if user.client_profile else 'N/A' }}
+                        {% elif user.role == 'lawyer' %}
+                            {{ user.lawyer_profile.name if user.lawyer_profile else 'N/A' }}
+                        {% else %}
+                            Admin
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.is_approved %}
+                            <span class="badge bg-success">✓ Yes</span>
+                        {% else %}
+                            <span class="badge bg-warning">⏳ Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.is_blacklisted %}
+                            <span class="badge bg-danger">✓ Yes</span>
+                        {% else %}
+                            <span class="badge bg-secondary">✗ No</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.role != 'admin' %}
+                            {% if not user.is_approved %}
+                                <a href="{{ url_for('approve_user', user_id=user.id) }}" class="btn btn-sm btn-success">Approve</a>
+                            {% else %}
+                                <a href="{{ url_for('reject_user', user_id=user.id) }}" class="btn btn-sm btn-warning">Reject</a>
+                            {% endif %}
+                            
+                            {% if not user.is_blacklisted %}
+                                <a href="{{ url_for('blacklist_user', user_id=user.id) }}" class="btn btn-sm btn-danger">Blacklist</a>
+                            {% else %}
+                                <a href="{{ url_for('unblacklist_user', user_id=user.id) }}" class="btn btn-sm btn-success">Unblacklist</a>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
