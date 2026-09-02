@@ -1,5 +1,5 @@
 from flask import Flask
-from models import db, User, Client, Lawyer
+from models import db, User, Client, Lawyer, Appointment
 from config import Config
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask import render_template, redirect, url_for, flash, request
@@ -148,14 +148,44 @@ def admin_dashboard():
 @role_required('client')
 def client_dashboard():
     client = Client.query.filter_by(user_id=current_user.id).first()
-    return render_template('client/dashboard.html', client=client)
+    
+    # Count appointments by status
+    total_appointments = Appointment.query.filter_by(client_id=client.id).count()
+    pending_appointments = Appointment.query.filter_by(client_id=client.id, status='pending').count()
+    accepted_appointments = Appointment.query.filter_by(client_id=client.id, status='accepted').count()
+    
+    return render_template('client/dashboard.html', 
+                         client=client, 
+                         total_appointments=total_appointments,
+                         pending_appointments=pending_appointments,
+                         accepted_appointments=accepted_appointments)
 
 @app.route('/lawyer/dashboard')
 @login_required
 @role_required('lawyer')
 def lawyer_dashboard():
     lawyer = Lawyer.query.filter_by(user_id=current_user.id).first()
-    return render_template('lawyer/dashboard.html', lawyer=lawyer)
+    
+    # Count pending requests
+    pending_requests = Appointment.query.filter_by(
+        lawyer_id=lawyer.id, 
+        status='pending'
+    ).count()
+    
+    # Count accepted appointments (not pending)
+    accepted_appointments = Appointment.query.filter_by(
+        lawyer_id=lawyer.id, 
+        status='accepted'
+    ).count()
+    
+    # Check if specialization is set
+    has_specialization = lawyer.specialization and lawyer.specialization != 'Not specified'
+    
+    return render_template('lawyer/dashboard.html', 
+                         lawyer=lawyer, 
+                         pending_requests=pending_requests,
+                         accepted_appointments=accepted_appointments,
+                         has_specialization=has_specialization)
 
 @app.route('/lawyer/profile/edit', methods=['GET', 'POST'])
 @login_required
@@ -198,24 +228,140 @@ def edit_client_profile():
 @login_required
 @role_required('client')
 def search_lawyers():
-    # Saare lawyers dikha do (no filter for now)
-    lawyers = Lawyer.query.all()
+    # Get filters from query parameters
+    specialization = request.args.get('specialization')
+    location = request.args.get('location')
     
+    # Debug: Check all lawyers
+    all_lawyers = Lawyer.query.all()
+    print(f"\n=== ALL LAWYERS IN DB ===")
+    for lawyer in all_lawyers:
+        user = User.query.get(lawyer.user_id)
+        print(f"  {lawyer.name} | Approved: {user.is_approved} | Spec: {lawyer.specialization} | Loc: {lawyer.location}")
+    
+    # Base query - sirf approved lawyers
+    lawyers = Lawyer.query.join(User).filter(User.is_approved == True)
+    
+    print(f"\n=== AFTER APPROVED FILTER ===")
+    print(f"  Lawyers count: {lawyers.count()}")
+    
+    # Apply filters
+    if specialization and specialization.strip() != '':
+        lawyers = lawyers.filter(Lawyer.specialization == specialization)
+        print(f"  Filtered by specialization: {specialization}")
+    
+    if location and location.strip() != '':
+        lawyers = lawyers.filter(Lawyer.location.ilike(f'%{location}%'))
+        print(f"  Filtered by location: {location}")
+    
+    lawyers = lawyers.all()
+    
+    print(f"\n=== FINAL RESULTS ===")
+    print(f"  Total lawyers found: {len(lawyers)}")
+    for lawyer in lawyers:
+        print(f"    - {lawyer.name}: {lawyer.specialization}, {lawyer.location}")
+    
+    # Get unique specializations for filter dropdown
     specializations = db.session.query(Lawyer.specialization).filter(
         Lawyer.specialization.isnot(None)
     ).distinct().all()
-    
-    print(f"Total lawyers: {len(lawyers)}")
-    for l in lawyers:
-        print(f"  {l.name} - Approved: {l.user.is_approved if hasattr(l, 'user') else 'N/A'}")
     
     return render_template('client/search_lawyers.html', 
                          lawyers=lawyers, 
                          specializations=specializations,
                          current_filters={
-                             'specialization': None,
-                             'location': None
+                             'specialization': specialization,
+                             'location': location
                          })
+
+@app.route('/appointment/book/<int:lawyer_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('client')
+def book_appointment(lawyer_id):
+    lawyer = Lawyer.query.get_or_404(lawyer_id)
+    
+    if request.method == 'POST':
+        date_str = request.form.get('date')
+        time_str = request.form.get('time')
+        reason = request.form.get('reason')
+        
+        # Convert date and time
+        from datetime import datetime
+        date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        time = datetime.strptime(time_str, '%H:%M').time()
+        
+        # Create appointment
+        client = Client.query.filter_by(user_id=current_user.id).first()
+        new_appointment = Appointment(  # ← Change variable name
+            client_id=client.id,
+            lawyer_id=lawyer.id,
+            date=date,
+            time=time,
+            reason=reason,
+            status='pending'
+        )
+        db.session.add(new_appointment)  # ← Use new name
+        db.session.commit()
+        
+        flash('Appointment booked successfully! Waiting for lawyer approval.', 'success')
+        return redirect(url_for('client_appointments'))
+    
+    return render_template('client/book_appointment.html', lawyer=lawyer)
+
+@app.route('/client/appointments')
+@login_required
+@role_required('client')
+def client_appointments():
+    client = Client.query.filter_by(user_id=current_user.id).first()
+    appointments = Appointment.query.filter_by(client_id=client.id).order_by(Appointment.date.desc()).all()
+    #          ^^^^^^^^^^^^ Capital A
+    return render_template('client/appointments.html', appointments=appointments)
+
+@app.route('/lawyer/appointments')
+@login_required
+@role_required('lawyer')
+def lawyer_appointments():
+    lawyer = Lawyer.query.filter_by(user_id=current_user.id).first()
+    
+    # Pending requests
+    pending_appointments = Appointment.query.filter_by(
+        lawyer_id=lawyer.id, 
+        status='pending'
+    ).order_by(Appointment.date.desc()).all()
+    
+    # Accepted appointments (not pending)
+    accepted_appointments = Appointment.query.filter_by(
+        lawyer_id=lawyer.id, 
+        status='accepted'
+    ).order_by(Appointment.date.desc()).all()
+    
+    return render_template('lawyer/appointments.html', 
+                         pending_appointments=pending_appointments,
+                         accepted_appointments=accepted_appointments,
+                         pending_count=len(pending_appointments),
+                         accepted_count=len(accepted_appointments))
+
+@app.route('/appointment/<int:appointment_id>/accept')
+@login_required
+@role_required('lawyer')
+def accept_appointment(appointment_id):
+    appointment = Appointment.query.get_or_404(appointment_id)
+    #           ^^^^^^^^^^^^ Capital A
+    appointment.status = 'accepted'
+    db.session.commit()
+    flash('Appointment accepted!', 'success')
+    return redirect(url_for('lawyer_appointments'))
+
+@app.route('/appointment/<int:appointment_id>/reject')
+@login_required
+@role_required('lawyer')
+def reject_appointment(appointment_id):
+    appointment = Appointment.query.get_or_404(appointment_id)
+    #           ^^^^^^^^^^^^ Capital A
+    appointment.status = 'rejected'
+    db.session.commit()
+    flash('Appointment rejected.', 'warning')
+    return redirect(url_for('lawyer_appointments'))
 
 @app.route('/admin/users')
 @login_required
@@ -269,6 +415,8 @@ def unblacklist_user(user_id):
         db.session.commit()
         flash(f'{user.role.title()} removed from blacklist.', 'success')
     return redirect(url_for('manage_users'))
+
+
 
 @app.route('/create_admin')
 def create_admin():

@@ -5,36 +5,44 @@
 {% block content %}
 <div class="text-center py-5">
     <h1>👤 Client Dashboard</h1>
-    <p class="lead">Welcome, {{ current_user.email }}!</p>
+    <p class="lead">Welcome, {{ client.name }}!</p>
     
     <div class="row mt-4">
+        <!-- My Appointments -->
         <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5>📄 My Documents</h5>
-                    <p class="display-6">0</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
+            <div class="card text-center">
                 <div class="card-body">
                     <h5>📅 My Appointments</h5>
-                    <p class="display-6">0</p>
+                    <p class="display-6">{{ total_appointments }}</p>
+                    <a href="{{ url_for('client_appointments') }}" class="btn btn-primary">View Appointments</a>
                 </div>
             </div>
         </div>
+        
+        <!-- Find Lawyers -->
         <div class="col-md-4">
-            <div class="card">
+            <div class="card text-center">
                 <div class="card-body">
                     <h5>⚖️ Find Lawyers</h5>
                     <p class="display-6">-</p>
-                    <a href="{{ url_for('search_lawyers') }}" class="btn btn-primary">Search Lawyers</a>
+                    <a href="{{ url_for('search_lawyers') }}" class="btn btn-success">Search Lawyers</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Edit Profile -->
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>👤 My Profile</h5>
+                    <p class="display-6">-</p>
+                    <a href="{{ url_for('edit_client_profile') }}" class="btn btn-info">✏️ Edit Profile</a>
                 </div>
             </div>
         </div>
     </div>
     
+
     <div class="mt-4">
         <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
     </div>

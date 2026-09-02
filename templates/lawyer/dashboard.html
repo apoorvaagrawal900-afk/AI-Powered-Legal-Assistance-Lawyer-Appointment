@@ -5,44 +5,47 @@
 {% block content %}
 <div class="text-center py-5">
     <h1>⚖️ Lawyer Dashboard</h1>
-    <p class="lead">Welcome, {{ current_user.email }}!</p>
+    <p class="lead">Welcome, {{ lawyer.name }}!</p>
+    
+    <!-- Specialization Warning -->
+    {% if not has_specialization %}
+    <div class="alert alert-warning mt-3">
+        ⚠️ <strong>Profile Incomplete!</strong> Please add your specialization in <a href="{{ url_for('edit_profile') }}">Edit Profile</a>.
+    </div>
+    {% endif %}
     
     <div class="row mt-4">
+        <!-- Pending Requests -->
         <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5>📅 Today's Appointments</h5>
-                    <p class="display-6">0</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
+            <div class="card text-center">
                 <div class="card-body">
                     <h5>⏳ Pending Requests</h5>
-                    <p class="display-6">0</p>
+                    <p class="display-6">{{ pending_requests }}</p>
+                    <a href="{{ url_for('lawyer_appointments') }}" class="btn btn-warning">View Requests</a>
                 </div>
             </div>
         </div>
-        <div class="mt-4">
-            <h4>Profile Summary</h4>
-            <div class="card">
-            <div class="card-body">
-            <p><strong>Specialization:</strong> {{ lawyer.specialization or 'Not set' }}</p>
-            <p><strong>Experience:</strong> {{ lawyer.experience_years or 0 }} years</p>
-            <p><strong>Fees:</strong> ₹{{ lawyer.fees or 0 }} per session</p>
-            <p><strong>Location:</strong> {{ lawyer.location or 'Not set' }}</p>
-            <p><strong>Phone:</strong> {{ lawyer.phone or 'Not set' }}</p>
-            <p><strong>Bio:</strong> {{ lawyer.bio or 'Not set' }}</p>
-            <p><strong>Status:</strong> 
-                <span class="badge bg-{{ 'success' if lawyer.is_approved else 'warning' }}">
-                    {{ 'Approved' if lawyer.is_approved else 'Pending Approval' }}
-                </span>
-            </p>
-            <hr>
-            <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">✏️ Edit Profile</a>
+        
+        <!-- Appointments -->
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>📅 Appointments</h5>
+                    <p class="display-6">{{ accepted_appointments }}</p>
+                    <a href="{{ url_for('lawyer_appointments') }}" class="btn btn-primary">View Appointments</a>
+                </div>
             </div>
         </div>
+        
+        <!-- Edit Profile -->
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>👤 Profile</h5>
+                    <p class="display-6">-</p>
+                    <a href="{{ url_for('edit_profile') }}" class="btn btn-success">✏️ Edit Profile</a>
+                </div>
+            </div>
         </div>
     </div>
     

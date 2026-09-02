@@ -16,16 +16,21 @@
                         <select name="specialization" class="form-select">
                             <option value="">All</option>
                             {% for spec in specializations %}
-                                {% if spec[0] %}
-                                    <option value="{{ spec[0] }}">{{ spec[0] }}</option>
-                                {% endif %}
-                            {% endfor %}
+                            {% if spec[0] %}
+                                 <option value="{{ spec[0] }}" 
+                                 {{ 'selected' if current_filters.specialization == spec[0] }}>
+                                {{ spec[0] }}
+                            </option>
+                            {% endif %}
+                             {% endfor %}
                         </select>
                     </div>
                     
                     <div class="col-md-4">
                         <label class="form-label">Location</label>
-                        <input type="text" name="location" class="form-control" placeholder="e.g., Delhi">
+                        <input type="text" name="location" class="form-control" 
+                            value="{{ current_filters.location or '' }}" 
+                                placeholder="e.g., Delhi">
                     </div>
                     
                     <div class="col-md-4 d-flex align-items-end">
@@ -52,7 +57,7 @@
                             <strong>Rating:</strong> ⭐ 4.5
                         </p>
                         <a href="#" class="btn btn-primary">View Profile</a>
-                        <a href="#" class="btn btn-success">Book Appointment</a>
+                        <a href="{{ url_for('book_appointment', lawyer_id=lawyer.id) }}" class="btn btn-success">📅 Book Appointment</a>
                     </div>
                 </div>
             </div>

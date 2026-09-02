@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Appointments{% endblock %}
+
+{% block content %}
+<div class="py-5">
+    <h1 class="mb-4">📅 My Appointments</h1>
+    
+    <!-- Pending Requests Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">⏳ Pending Requests ({{ pending_count }})</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Reason</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in pending_appointments %}
+                    <tr>
+                        <td>{{ appointment.client.name }}</td>
+                        <td>{{ appointment.date.strftime('%d %b %Y') }}</td>
+                        <td>{{ appointment.time.strftime('%I:%M %p') }}</td>
+                        <td>{{ appointment.reason[:50] }}...</td>
+                        <td>
+                            <a href="{{ url_for('accept_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-success">✓ Accept</a>
+                            <a href="{{ url_for('reject_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-danger">✗ Reject</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No pending requests</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Accepted Appointments Section -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">✅ Accepted Appointments ({{ accepted_count }})</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in accepted_appointments %}
+                    <tr>
+                        <td>{{ appointment.client.name }}</td>
+                        <td>{{ appointment.date.strftime('%d %b %Y') }}</td>
+                        <td>{{ appointment.time.strftime('%I:%M %p') }}</td>
+                        <td>{{ appointment.reason[:50] }}...</td>
+                        <td>
+                            <span class="badge bg-success">{{ appointment.status.title() }}</span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No accepted appointments</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
