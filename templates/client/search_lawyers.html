@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Find Lawyers{% endblock %}
+
+{% block content %}
+<div class="py-5">
+    <h1 class="mb-4">⚖️ Find Lawyers</h1>
+    
+    <!-- Search Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('search_lawyers') }}">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label class="form-label">Specialization</label>
+                        <select name="specialization" class="form-select">
+                            <option value="">All</option>
+                            {% for spec in specializations %}
+                                {% if spec[0] %}
+                                    <option value="{{ spec[0] }}">{{ spec[0] }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label">Location</label>
+                        <input type="text" name="location" class="form-control" placeholder="e.g., Delhi">
+                    </div>
+                    
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">🔍 Search</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Results -->
+    <div class="row">
+        {% if lawyers %}
+            {% for lawyer in lawyers %}
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ lawyer.name }}</h5>
+                        <p class="card-text">
+                            <strong>Specialization:</strong> {{ lawyer.specialization or 'Not specified' }}<br>
+                            <strong>Experience:</strong> {{ lawyer.experience_years }} years<br>
+                            <strong>Fees:</strong> ₹{{ lawyer.fees }} per session<br>
+                            <strong>Location:</strong> {{ lawyer.location or 'Not specified' }}<br>
+                            <strong>Rating:</strong> ⭐ 4.5
+                        </p>
+                        <a href="#" class="btn btn-primary">View Profile</a>
+                        <a href="#" class="btn btn-success">Book Appointment</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    No lawyers found. Check back later!
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

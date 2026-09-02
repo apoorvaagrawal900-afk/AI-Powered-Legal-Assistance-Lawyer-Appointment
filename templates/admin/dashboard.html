@@ -9,33 +9,63 @@
     
     <div class="row mt-4">
         <div class="col-md-4">
-    <div class="card bg-primary text-white">
-        <div class="card-body">
-            <h5>Total Users</h5>
-            <p class="display-4">{{ total_users }}</p>
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5>Total Users</h5>
+                    <p class="display-4">{{ total_users }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5>Total Clients</h5>
+                    <p class="display-4">{{ total_clients }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5>Total Lawyers</h5>
+                    <p class="display-4">{{ total_lawyers }}</p>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-<div class="col-md-4">
-    <div class="card bg-success text-white">
-        <div class="card-body">
-            <h5>Total Clients</h5>
-            <p class="display-4">{{ total_clients }}</p>
+    
+    <!-- Quick Actions -->
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">👥 User Management</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Approve, reject, or blacklist users</p>
+                    <a href="{{ url_for('manage_users') }}" class="btn btn-primary">Manage Users</a>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-<div class="col-md-4">
-    <div class="card bg-info text-white">
-        <div class="card-body">
-            <h5>Total Lawyers</h5>
-            <p class="display-4">{{ total_lawyers }}</p>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">📊 Analytics</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">View platform statistics and reports</p>
+                    <button class="btn btn-secondary" disabled>Coming Soon</button>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
     </div>
     
     <div class="mt-4">
         <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
     </div>
 </div>
+<!-- <div class="alert alert-warning mt-4">
+    <strong>⏳ {{ pending_approvals }}</strong> users pending approval
+</div> -->
 {% endblock %}

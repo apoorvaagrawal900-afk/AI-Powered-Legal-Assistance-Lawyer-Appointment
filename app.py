@@ -194,7 +194,28 @@ def edit_client_profile():
     
     return render_template('client/edit_profile.html', client=client)
 
-
+@app.route('/lawyers/search')
+@login_required
+@role_required('client')
+def search_lawyers():
+    # Saare lawyers dikha do (no filter for now)
+    lawyers = Lawyer.query.all()
+    
+    specializations = db.session.query(Lawyer.specialization).filter(
+        Lawyer.specialization.isnot(None)
+    ).distinct().all()
+    
+    print(f"Total lawyers: {len(lawyers)}")
+    for l in lawyers:
+        print(f"  {l.name} - Approved: {l.user.is_approved if hasattr(l, 'user') else 'N/A'}")
+    
+    return render_template('client/search_lawyers.html', 
+                         lawyers=lawyers, 
+                         specializations=specializations,
+                         current_filters={
+                             'specialization': None,
+                             'location': None
+                         })
 
 @app.route('/admin/users')
 @login_required
