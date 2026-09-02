@@ -89,7 +89,16 @@ def register():
             client = Client(user_id=user.id, name=name, phone=phone, location=location)
             db.session.add(client)
         elif role == 'lawyer':
-            lawyer = Lawyer(user_id=user.id, name=name, location=location)
+            lawyer = Lawyer(
+            user_id=user.id, 
+            name=name, 
+            location=location, 
+            phone=phone,
+            specialization='Not specified',  # Default value
+            experience_years=0,  # Default value
+            fees=0.0,  # Default value
+            bio='Profile not updated yet'  # Default value
+            )
             db.session.add(lawyer)
         
         db.session.commit()
@@ -106,17 +115,51 @@ def logout():
     flash('Logged out successfully.', 'info')
     return redirect(url_for('index'))
 
+@app.route('/admin/dashboard')
+@login_required
+@role_required('admin')
+def admin_dashboard():
+    total_users = User.query.count()
+    total_clients = Client.query.count()
+    total_lawyers = Lawyer.query.count()
+    return render_template('admin/dashboard.html', 
+                         total_users=total_users, 
+                         total_clients=total_clients, 
+                         total_lawyers=total_lawyers)
+
 @app.route('/client/dashboard')
 @login_required
 @role_required('client')
 def client_dashboard():
-    return render_template('client/dashboard.html')
+    client = Client.query.filter_by(user_id=current_user.id).first()
+    return render_template('client/dashboard.html', client=client)
 
 @app.route('/lawyer/dashboard')
 @login_required
 @role_required('lawyer')
 def lawyer_dashboard():
-    return render_template('lawyer/dashboard.html')
+    lawyer = Lawyer.query.filter_by(user_id=current_user.id).first()
+    return render_template('lawyer/dashboard.html', lawyer=lawyer)
+
+@app.route('/lawyer/profile/edit', methods=['GET', 'POST'])
+@login_required
+@role_required('lawyer')
+def edit_profile():
+    lawyer = Lawyer.query.filter_by(user_id=current_user.id).first()
+    
+    if request.method == 'POST':
+        lawyer.specialization = request.form.get('specialization')
+        lawyer.experience_years = int(request.form.get('experience_years'))
+        lawyer.fees = float(request.form.get('fees'))
+        lawyer.phone = request.form.get('phone')
+        lawyer.location = request.form.get('location')
+        lawyer.bio = request.form.get('bio')
+        
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('lawyer_dashboard'))
+    
+    return render_template('lawyer/edit_profile.html', lawyer=lawyer)
 
 @app.route('/admin/dashboard')
 @login_required

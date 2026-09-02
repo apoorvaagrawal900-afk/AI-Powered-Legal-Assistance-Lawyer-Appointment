@@ -35,7 +35,7 @@ class Client(db.Model):
     
     # Relationships
     documents = db.relationship('Document', backref='client', lazy=True)
-    appointments = db.relationship('Appointment', backref='client', lazy=True)
+    appointments = db.relationship('Appointment', back_populates='client', lazy=True)
 
 class Lawyer(db.Model):
     __tablename__ = 'lawyers'
@@ -46,12 +46,13 @@ class Lawyer(db.Model):
     specialization = db.Column(db.String(100), nullable=False)
     experience_years = db.Column(db.Integer, default=0)
     fees = db.Column(db.Float, default=0.0)
+    phone = db.Column(db.String(15))
     location = db.Column(db.String(100))
     bio = db.Column(db.Text)
     is_approved = db.Column(db.Boolean, default=False)
     
     # Relationships
-    appointments = db.relationship('Appointment', backref='lawyer', lazy=True)
+    appointments = db.relationship('Appointment', back_populates='lawyer', lazy=True)
 
 class Document(db.Model):
     __tablename__ = 'documents'
@@ -74,3 +75,13 @@ class Appointment(db.Model):
     status = db.Column(db.String(20), default='pending')  # pending, accepted, rejected, completed
     reason = db.Column(db.Text)  # For Milestone 3
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    client=db.relationship('Client', back_populates='appointments')
+    lawyer=db.relationship('Lawyer', back_populates='appointments')
+
+class Category(db.Model):
+    __tablename__ = 'categories'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)  # Property, Employment, Family, etc.
+    description = db.Column(db.Text)
