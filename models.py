@@ -1,3 +1,4 @@
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -37,7 +38,7 @@ class Client(db.Model):
     location = db.Column(db.String(100))
     
     # Relationships
-    documents = db.relationship('Document', backref='client', lazy=True)
+    documents = db.relationship('Document', back_populates='client', lazy=True)
     appointments = db.relationship('Appointment', back_populates='client', lazy=True)
 
 class Lawyer(db.Model):
@@ -57,16 +58,6 @@ class Lawyer(db.Model):
     # Relationships
     appointments = db.relationship('Appointment', back_populates='lawyer', lazy=True)
 
-class Document(db.Model):
-    __tablename__ = 'documents'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
-    filename = db.Column(db.String(255), nullable=False)
-    file_path = db.Column(db.String(255), nullable=False)
-    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
-    summary = db.Column(db.Text)  # For Milestone 3
-
 class Appointment(db.Model):
     __tablename__ = 'appointments'
     
@@ -81,6 +72,31 @@ class Appointment(db.Model):
 
     client=db.relationship('Client', back_populates='appointments')
     lawyer=db.relationship('Lawyer', back_populates='appointments')
+
+class Question(db.Model):
+    __tablename__ = 'questions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    document_id = db.Column(db.Integer, db.ForeignKey('documents.id'), nullable=False)
+    question = db.Column(db.Text, nullable=False)
+    answer = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    document = db.relationship('Document', back_populates='questions', lazy=True)
+
+class Document(db.Model):
+    __tablename__ = 'documents'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    file_path = db.Column(db.String(255), nullable=False)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    summary = db.Column(db.Text)  # For Milestone 3
+
+    client = db.relationship('Client', back_populates='documents', lazy=True)
+    questions = db.relationship('Question', back_populates='document', lazy=True, cascade='all, delete-orphan')
+
 
 class Category(db.Model):
     __tablename__ = 'categories'

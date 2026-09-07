@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Document Summary & Q&A{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">📄 {{ document.filename }}</h1>
+    
+    <!-- Summary Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">📝 AI Summary</h5>
+        </div>
+        <div class="card-body">
+            {% if document.summary %}
+            <div style="white-space: pre-line;">{{ document.summary }}</div>
+            {% else %}
+            <p class="text-muted">No summary available.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Q&A Chat Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">💬 Ask Questions About This Document</h5>
+        </div>
+        <div class="card-body">
+            <!-- Chat History -->
+            <div class="mb-4" style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+                {% if questions %}
+                    {% for qa in questions %}
+                    <div class="mb-3">
+                        <div class="alert alert-info">
+                            <strong>❓ You:</strong> {{ qa.question }}
+                        </div>
+                        <div class="alert alert-success">
+                            <strong>🤖 AI:</strong>
+                            <div style="white-space: pre-line;">{{ qa.answer }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <p class="text-muted text-center">No questions asked yet. Start by asking your first question below!</p>
+                {% endif %}
+            </div>
+            
+            <!-- Ask Question Form -->
+            <form method="POST" action="{{ url_for('ask_document_question', doc_id=document.id) }}">
+                <div class="mb-3">
+                    <textarea name="question" class="form-control" rows="3" placeholder="E.g., What is the main clause about termination? What are the payment terms?" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">💬 Ask Question</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ url_for('client_documents') }}" class="btn btn-secondary">← Back to Documents</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,9 +1,17 @@
 from flask import Flask
-from models import db, User, Client, Lawyer, Appointment
+from models import db, User, Client, Lawyer, Appointment, Document, Question
 from config import Config
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask import render_template, redirect, url_for, flash, request
 from functools import wraps
+import os
+import json
+import fitz  # PyMuPDF
+from google import genai
+from dotenv import load_dotenv
+from datetime import datetime
+
+
 
 app=Flask(__name__)
 app.config.from_object(Config)
@@ -17,9 +25,66 @@ login_manager.init_app(app)
 with app.app_context():
     db.create_all()
 
+# Load environment variables
+load_dotenv()
+
+# Initialize Gemini client
+gemini_client = genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
+
+# Create uploads folder
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+# ========== AI Helper Functions (Gemini) ==========
+
+def extract_text_from_pdf(file_path):
+    """Extract text from PDF using PyMuPDF"""
+    doc = fitz.open(file_path)
+    text = ""
+    for page in doc:
+        text += page.get_text()
+    doc.close()
+    return text
+
+def generate_summary(text):
+    """Generate summary using Gemini (bullet points)"""
+    try:
+        prompt = f"""You are a legal document summarization expert. Summarize the following legal text in detailed bullet points covering all key clauses, terms, and important information.
+
+Legal Document:
+{text[:3000]}
+
+Provide the summary as bullet points (use - for each point). Cover all important sections, clauses, definitions, rights, obligations, and key terms."""
+        
+        response = gemini_client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=prompt
+        )
+        return response.text
+    except Exception as e:
+        return f"Error generating summary: {str(e)}"
+
+def classify_legal_issue(description):
+    """Classify legal issue into category using Gemini"""
+    try:
+        prompt = f"""You are a legal classification expert. Classify legal issues into these categories: Property, Employment, Family, Criminal, Consumer, Corporate, or Other.
+
+Legal Issue Description:
+{description}
+
+Respond with ONLY the category name (one word):"""
+        
+        response = gemini_client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=prompt
+        )
+        return response.text.strip()
+    except Exception as e:
+        return "Other"
 
 
 @app.route('/')
@@ -416,7 +481,100 @@ def unblacklist_user(user_id):
         flash(f'{user.role.title()} removed from blacklist.', 'success')
     return redirect(url_for('manage_users'))
 
+# ========== Document Routes (Milestone 3) ==========
 
+@app.route('/client/documents')
+@login_required
+@role_required('client')
+def client_documents():
+    """View all uploaded documents"""
+    client_profile = Client.query.filter_by(user_id=current_user.id).first()
+    documents = Document.query.filter_by(client_id=client_profile.id).order_by(Document.uploaded_at.desc()).all()
+    return render_template('client/documents.html', documents=documents)
+
+@app.route('/client/document/upload', methods=['GET', 'POST'])
+@login_required
+@role_required('client')
+def upload_document():
+    """Upload and summarize PDF document"""
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        file = request.files['file']
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        if file and file.filename.endswith('.pdf'):
+            # Save file
+            filename = f"{datetime.utcnow().timestamp()}_{file.filename}"
+            file_path = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(file_path)
+            
+            # Extract text
+            text = extract_text_from_pdf(file_path)
+            
+            # Generate summary
+            summary = generate_summary(text)
+            
+            # Save to database
+            client_profile = Client.query.filter_by(user_id=current_user.id).first()
+            new_doc = Document(
+                client_id=client_profile.id,
+                filename=file.filename,
+                file_path=file_path,
+                summary=summary
+            )
+            db.session.add(new_doc)
+            db.session.commit()
+            
+            flash('Document uploaded and summarized successfully!', 'success')
+            return redirect(url_for('client_documents'))
+        else:
+            flash('Please upload a PDF file only', 'error')
+            return redirect(request.url)
+    
+    return render_template('client/upload_document.html')
+
+@app.route('/client/document/<int:doc_id>')
+@login_required
+@role_required('client')
+def view_document(doc_id):
+    """View document details, summary, and Q&A history"""
+    document = Document.query.get_or_404(doc_id)
+    questions = Question.query.filter_by(document_id=doc_id).order_by(Question.created_at.asc()).all()
+    return render_template('client/view_document.html', document=document, questions=questions)
+
+@app.route('/client/document/<int:doc_id>/ask', methods=['GET', 'POST'])
+@login_required
+@role_required('client')
+def ask_document_question(doc_id):
+    """Ask questions about document"""
+    document = Document.query.get_or_404(doc_id)
+    
+    if request.method == 'POST':
+        question_text = request.form.get('question')
+        
+        # Extract text from PDF
+        text = extract_text_from_pdf(document.file_path)
+        
+        # Get answer
+        answer = answer_document_question(text, question_text)
+        
+        # Save to database
+        new_question = Question(
+            document_id=doc_id,
+            question=question_text,
+            answer=answer
+        )
+        db.session.add(new_question)
+        db.session.commit()
+        
+        return redirect(url_for('view_document', doc_id=doc_id))
+    
+    return redirect(url_for('view_document', doc_id=doc_id))
 
 @app.route('/create_admin')
 def create_admin():

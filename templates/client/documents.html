@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}My Documents{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">📄 My Documents</h1>
+    
+    <div class="mb-4">
+        <a href="{{ url_for('upload_document') }}" class="btn btn-primary">📤 Upload New Document</a>
+    </div>
+    
+    {% if documents %}
+    <div class="row">
+        {% for doc in documents %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">📄 {{ doc.filename }}</h5>
+                    <p class="card-text text-muted">
+                        <small>Uploaded: {{ doc.uploaded_at.strftime('%d %b %Y, %I:%M %p') }}</small>
+                    </p>
+                    <a href="{{ url_for('view_document', doc_id=doc.id) }}" class="btn btn-sm btn-info">View Summary</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No documents uploaded yet. <a href="{{ url_for('upload_document') }}">Upload your first document</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
