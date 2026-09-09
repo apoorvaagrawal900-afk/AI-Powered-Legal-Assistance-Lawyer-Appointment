@@ -8,6 +8,18 @@
     <p class="lead">Welcome, {{ client.name }}!</p>
     
     <div class="row mt-4">
+
+<!-- Legal Issues Card -->
+<div class="col-md-4">
+    <div class="card text-center">
+        <div class="card-body">
+            <h5>⚖️ Legal Issues</h5>
+            <p class="display-6">-</p>
+            <a href="{{ url_for('client_legal_issues') }}" class="btn btn-success">My Issues</a>
+        </div>
+    </div>
+</div>
+
         <!-- My Appointments -->
         <div class="col-md-4">
             <div class="card text-center">

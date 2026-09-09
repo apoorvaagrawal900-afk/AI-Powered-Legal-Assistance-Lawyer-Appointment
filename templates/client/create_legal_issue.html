@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Legal Issue Classification{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">⚖️ Describe Your Legal Issue</h1>
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Describe your legal issue in detail</label>
+                    <textarea name="description" class="form-control" rows="6" placeholder="E.g., My landlord is refusing to return my security deposit even though I've moved out and the property is in good condition. I have all the documents and photos showing the property was well-maintained." required></textarea>
+                    <small class="text-muted">AI will classify your issue and suggest relevant lawyers in your area</small>
+                </div>
+                <button type="submit" class="btn btn-primary">🔍 Classify & Get Suggestions</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ url_for('client_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

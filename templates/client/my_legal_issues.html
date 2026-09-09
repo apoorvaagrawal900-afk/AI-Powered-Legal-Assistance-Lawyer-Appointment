@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}My Legal Issues{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">⚖️ My Legal Issues</h1>
+    
+    <div class="mb-4">
+        <a href="{{ url_for('create_legal_issue') }}" class="btn btn-primary">➕ Create New Issue</a>
+    </div>
+    
+    {% if issues %}
+    <div class="row">
+        {% for issue in issues %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <span class="badge bg-primary">{{ issue.category }}</span>
+                    </h5>
+                    <p class="card-text">{{ issue.description[:150] }}...</p>
+                    <p class="card-text">
+                        <small class="text-muted">Created: {{ issue.created_at.strftime('%d %b %Y, %I:%M %p') }}</small>
+                    </p>
+                    <a href="{{ url_for('view_legal_issue', issue_id=issue.id) }}" class="btn btn-sm btn-info">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No legal issues created yet. <a href="{{ url_for('create_legal_issue') }}">Create your first issue</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

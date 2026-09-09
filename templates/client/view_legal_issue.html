@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Legal Issue Details{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">⚖️ Your Legal Issue</h1>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>📝 Description</h5>
+            <p>{{ issue.description }}</p>
+            <hr>
+            <h5>🏷️ AI Classification</h5>
+            <span class="badge bg-primary fs-5">{{ issue.category }}</span>
+            <p class="text-muted mt-2">Created: {{ issue.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">👨‍⚖️ Suggested Lawyers ({{ lawyers|length }})</h5>
+        </div>
+        <div class="card-body">
+            {% if lawyers %}
+            <div class="row">
+                {% for lawyer in lawyers %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5>{{ lawyer.name }}</h5>
+                            <p class="text-muted">{{ lawyer.specialization or 'Not specified' }}</p>
+                            <p><strong>Experience:</strong> {{ lawyer.experience or 'N/A' }} years</p>
+                            <p><strong>Fees:</strong> ₹{{ lawyer.fees or 'N/A' }}</p>
+                            <p><strong>Location:</strong> {{ lawyer.location or 'Not specified' }}</p>
+                            {% if lawyer.bio %}
+                            <p class="small text-muted">{{ lawyer.bio[:100] }}...</p>
+                            {% endif %}
+                            <a href="{{ url_for('book_appointment', lawyer_id=lawyer.id) }}" class="btn btn-primary btn-sm">📅 Book Appointment</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                No lawyers found for <strong>{{ issue.category }}</strong> specialization in your area. Try searching all lawyers or contact support.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ url_for('client_legal_issues') }}" class="btn btn-secondary">← Back to My Issues</a>
+        <a href="{{ url_for('create_legal_issue') }}" class="btn btn-info">➕ New Issue</a>
+    </div>
+</div>
+{% endblock %}

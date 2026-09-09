@@ -1,5 +1,5 @@
 from flask import Flask
-from models import db, User, Client, Lawyer, Appointment, Document, Question
+from models import db, User, Client, Lawyer, Appointment, Document, Question, LegalIssue
 from config import Config
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask import render_template, redirect, url_for, flash, request
@@ -67,6 +67,26 @@ Provide the summary as bullet points (use - for each point). Cover all important
         return response.text
     except Exception as e:
         return f"Error generating summary: {str(e)}"
+
+def answer_document_question(text, question):
+    """Answer questions about document content using Gemini"""
+    try:
+        prompt = f"""You are a legal document Q&A assistant. Answer questions based ONLY on the provided document text. If the answer is not in the text, say "This information is not available in the document."
+
+Document Text:
+{text[:3000]}
+
+Question: {question}
+
+Answer:"""
+        
+        response = gemini_client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=prompt
+        )
+        return response.text
+    except Exception as e:
+        return f"Error answering: {str(e)}"
 
 def classify_legal_issue(description):
     """Classify legal issue into category using Gemini"""
@@ -575,6 +595,71 @@ def ask_document_question(doc_id):
         return redirect(url_for('view_document', doc_id=doc_id))
     
     return redirect(url_for('view_document', doc_id=doc_id))
+
+# ========== Legal Issue Classification Routes ==========
+
+@app.route('/client/legal-issue', methods=['GET', 'POST'])
+@login_required
+@role_required('client')
+def create_legal_issue():
+    """Create and classify legal issue"""
+    if request.method == 'POST':
+        description = request.form.get('description')
+        
+        # Classify issue using AI
+        category = classify_legal_issue(description)
+        
+        # Find suggested lawyers based on category and client location
+        client_profile = Client.query.filter_by(user_id=current_user.id).first()
+        
+        # Search lawyers by specialization and location
+        lawyers = Lawyer.query.filter_by(specialization=category).filter(
+            Lawyer.location.ilike(f'%{client_profile.location}%')
+        ).limit(5).all()
+        
+        # If no lawyers found in location, search without location filter
+        if not lawyers:
+            lawyers = Lawyer.query.filter_by(specialization=category).limit(5).all()
+        
+        # Convert lawyer IDs to JSON string
+        suggested_ids = json.dumps([str(l.id) for l in lawyers])
+        
+        # Save to database
+        new_issue = LegalIssue(
+            client_id=client_profile.id,
+            description=description,
+            category=category,
+            suggested_lawyer_ids=suggested_ids
+        )
+        db.session.add(new_issue)
+        db.session.commit()
+        
+        flash(f'Issue classified as: {category}. {len(lawyers)} lawyers suggested.', 'success')
+        return redirect(url_for('view_legal_issue', issue_id=new_issue.id))
+    
+    return render_template('client/create_legal_issue.html')
+
+@app.route('/client/legal-issue/<int:issue_id>')
+@login_required
+@role_required('client')
+def view_legal_issue(issue_id):
+    """View legal issue details and suggested lawyers"""
+    issue = LegalIssue.query.get_or_404(issue_id)
+    
+    # Get suggested lawyers from JSON
+    suggested_ids = json.loads(issue.suggested_lawyer_ids) if issue.suggested_lawyer_ids else []
+    suggested_lawyers = Lawyer.query.filter(Lawyer.id.in_(suggested_ids)).all()
+    
+    return render_template('client/view_legal_issue.html', issue=issue, lawyers=suggested_lawyers)
+
+@app.route('/client/my-legal-issues')
+@login_required
+@role_required('client')
+def client_legal_issues():
+    """View all legal issues"""
+    client_profile = Client.query.filter_by(user_id=current_user.id).first()
+    issues = LegalIssue.query.filter_by(client_id=client_profile.id).order_by(LegalIssue.created_at.desc()).all()
+    return render_template('client/my_legal_issues.html', issues=issues)
 
 @app.route('/create_admin')
 def create_admin():

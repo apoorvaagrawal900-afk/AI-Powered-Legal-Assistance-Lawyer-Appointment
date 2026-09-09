@@ -40,6 +40,7 @@ class Client(db.Model):
     # Relationships
     documents = db.relationship('Document', back_populates='client', lazy=True)
     appointments = db.relationship('Appointment', back_populates='client', lazy=True)
+    legal_issues=db.relationship('LegalIssue', back_populates='client', lazy=True)
 
 class Lawyer(db.Model):
     __tablename__ = 'lawyers'
@@ -96,6 +97,20 @@ class Document(db.Model):
 
     client = db.relationship('Client', back_populates='documents', lazy=True)
     questions = db.relationship('Question', back_populates='document', lazy=True, cascade='all, delete-orphan')
+
+# Legal Issue Table (for issue classification)
+class LegalIssue(db.Model):
+    __tablename__ = 'legal_issues'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String(100))
+    suggested_lawyer_ids = db.Column(db.Text)  # JSON string of lawyer IDs
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationship
+    client = db.relationship('Client', back_populates='legal_issues', lazy=True)
 
 
 class Category(db.Model):
