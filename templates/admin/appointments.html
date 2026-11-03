@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}All Appointments{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">📅 All Appointments</h2>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Lawyer</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Mode</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in appointments %}
+                    <tr>
+                        <td>{{ appointment.client.name }}</td>
+                        <td>{{ appointment.lawyer.name }}</td>
+                        <td>{{ appointment.date.strftime('%d %b %Y') }}</td>
+                        <td>{{ appointment.time.strftime('%I:%M %p') }}</td>
+                        <td>{{ appointment.mode|title }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'warning text-dark' if appointment.status == 'pending' else 'success' if appointment.status == 'approved' else 'danger' if appointment.status == 'rejected' else 'secondary' }}">
+                                {{ appointment.status|title }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-center text-muted">No appointments yet</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

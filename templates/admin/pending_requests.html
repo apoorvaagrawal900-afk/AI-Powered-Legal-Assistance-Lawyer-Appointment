@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Pending Requests{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">⏳ Pending Requests</h2>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+    
+    <div class="card">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">Pending Approvals ({{ users|length }})</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Name</th>
+                        <th>Registered</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'primary' if user.role == 'client' else 'success' }}">
+                                {{ user.role|title }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if user.role == 'client' %}
+                                {{ user.client_profile.name if user.client_profile else 'N/A' }}
+                            {% elif user.role == 'lawyer' %}
+                                {{ user.lawyer_profile.name if user.lawyer_profile else 'N/A' }}
+                            {% endif %}
+                        </td>
+                        <td>{{ user.created_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+                        <td>
+                            <a href="{{ url_for('approve_user', user_id=user.id) }}" class="btn btn-sm btn-success">✓ Approve</a>
+                            <a href="{{ url_for('reject_user', user_id=user.id) }}" class="btn btn-sm btn-danger">✗ Reject</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No pending requests</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

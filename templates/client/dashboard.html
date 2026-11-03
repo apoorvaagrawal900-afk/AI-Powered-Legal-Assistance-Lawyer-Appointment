@@ -3,71 +3,393 @@
 {% block title %}Client Dashboard{% endblock %}
 
 {% block content %}
-<div class="text-center py-5">
-    <h1>👤 Client Dashboard</h1>
-    <p class="lead">Welcome, {{ client.name }}!</p>
-    
-    <div class="row mt-4">
+<div class="container py-4">
 
-<!-- Legal Issues Card -->
-<div class="col-md-4">
-    <div class="card text-center">
-        <div class="card-body">
-            <h5>⚖️ Legal Issues</h5>
-            <p class="display-6">-</p>
-            <a href="{{ url_for('client_legal_issues') }}" class="btn btn-success">My Issues</a>
-        </div>
-    </div>
-</div>
+    <h2 class="mb-1">Welcome back, {{ client.name }}! 👋</h2>
+    <p class="text-muted mb-4">
+        Your safety, our priority. Get the right legal support anytime.
+    </p>
 
-        <!-- My Appointments -->
+    <!-- Stats Row -->
+    <!-- <div class="row g-3 mb-4">
         <div class="col-md-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5>📅 My Appointments</h5>
-                    <p class="display-6">{{ total_appointments }}</p>
-                    <a href="{{ url_for('client_appointments') }}" class="btn btn-primary">View Appointments</a>
+            <div class="card border-0 bg-primary bg-opacity-10 rounded-4 h-100">
+                <div class="card-body text-center py-4">
+                    <div class="fs-3 mb-2" aria-hidden="true">📅</div>
+                    <h2>{{ total_appointments }}</h2>
+                    <h5 class="text-primary-emphasis mb-0">Appointments</h5>
                 </div>
             </div>
         </div>
 
-        <!-- My Documents Card -->
-<div class="col-md-4">
-    <div class="card text-center">
-        <div class="card-body">
-            <h5>📄 My Documents</h5>
-            <p class="display-6">-</p>
-            <a href="{{ url_for('client_documents') }}" class="btn btn-info">View Documents</a>
-        </div>
-    </div>
-</div>
-        
-        <!-- Find Lawyers -->
         <div class="col-md-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5>⚖️ Find Lawyers</h5>
-                    <p class="display-6">-</p>
-                    <a href="{{ url_for('search_lawyers') }}" class="btn btn-success">Search Lawyers</a>
+            <div class="card border-0 bg-primary bg-opacity-10 rounded-4 h-100">
+                <div class="card-body text-center py-4">
+                    <div class="fs-3 mb-2" aria-hidden="true">📁</div>
+                    <h2>{{ active_cases|length }}</h2>
+                    <h5 class="text-primary-emphasis mb-0">Active Cases</h5>
                 </div>
             </div>
         </div>
-        
-        <!-- Edit Profile -->
-        <div class="col-md-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5>👤 My Profile</h5>
-                    <p class="display-6">-</p>
-                    <a href="{{ url_for('edit_client_profile') }}" class="btn btn-info">✏️ Edit Profile</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    
 
-    <div class="mt-4">
-        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+        <div class="col-md-4">
+            <div class="card border-0 bg-primary bg-opacity-10 rounded-4 h-100">
+                <div class="card-body text-center py-4">
+                    <div class="fs-3 mb-2" aria-hidden="true">📄</div>
+                    <h2>{{ total_documents }}</h2>
+                    <h5 class="text-primary-emphasis mb-0">Documents</h5>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- Main Safety + Legal Help Row -->
+    <div class="row g-4 mb-4">
+
+        <!-- Left: Women's Safety -->
+        <div class="col-lg-6">
+
+            <!-- <h2 class="mb-1">Women’s Safety</h2>
+            <p class="text-muted mb-4">
+                Safety, awareness and support in one place
+            </p> -->
+
+            <!-- Emergency Contacts -->
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="bg-danger-subtle text-danger rounded-3 p-3">
+                            <i class="bi bi-shield-fill-check fs-3"></i>
+                             <!-- <i class="bi bi-telephone-fill fs-2 text-primary"></i> -->
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                Women's Safety Emergency Contacts
+                            </h5>
+                            <p class="text-secondary small mb-0">
+                                Quick access to important emergency helplines.
+                            </p>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-outline-danger w-100"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#emergencyContactList"
+                            aria-expanded="false"
+                            aria-controls="emergencyContactList">
+                        <i class="bi bi-telephone-fill me-2"></i>
+                        View 5 Emergency Contacts
+                        <i class="bi bi-chevron-down float-end"></i>
+                    </button>
+
+                    <div class="collapse mt-3" id="emergencyContactList">
+                        <div class="list-group">
+
+                            <a href="tel:112"
+                               class="list-group-item list-group-item-action">
+                                <strong>112 — Emergency Response</strong>
+                                <small class="d-block text-secondary">
+                                    Police, medical emergency and immediate danger
+                                </small>
+                            </a>
+
+                            <a href="tel:181"
+                               class="list-group-item list-group-item-action">
+                                <strong>181 — Women Helpline</strong>
+                                <small class="d-block text-secondary">
+                                    Women facing violence, distress or needing support
+                                </small>
+                            </a>
+
+                            <a href="tel:14490"
+                               class="list-group-item list-group-item-action">
+                                <strong>14490 — NCW Helpline</strong>
+                                <small class="d-block text-secondary">
+                                    National Commission for Women support
+                                </small>
+                            </a>
+
+                            <a href="tel:1098"
+                               class="list-group-item list-group-item-action">
+                                <strong>1098 — Child Helpline</strong>
+                                <small class="d-block text-secondary">
+                                    For girls and children needing protection
+                                </small>
+                            </a>
+
+                            <a href="tel:1930"
+                               class="list-group-item list-group-item-action">
+                                <strong>1930 — Cyber Financial Fraud</strong>
+                                <small class="d-block text-secondary">
+                                    For online financial fraud involving money transfers
+                                </small>
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Helpline & Complain Assist -->
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-success-subtle text-success rounded-3 p-3">
+                            <i class="bi bi-headset fs-3"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                Helpline & Complain Assist
+                            </h5>
+                            <p class="text-secondary small mb-0">
+                                Find complaint categories, official helplines and
+                                step-by-step filing help.
+                            </p>
+                        </div>
+                    </div>
+
+                    <a href="{{ url_for('complaint_assistant') }}"
+                       class="btn btn-success mt-3">
+                        Open Complaint Assistant
+                        <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Analyze Document -->
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-info-subtle text-info rounded-3 p-3">
+                            <i class="bi bi-file-earmark-text fs-3"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                📄 Analyze Document
+                            </h5>
+                            <p class="text-secondary small mb-0">
+                                Upload a legal document for AI summary & Q&A.
+                            </p>
+                        </div>
+                    </div>
+
+                    <a href="{{ url_for('client_documents') }}"
+                       class="btn btn-outline-primary mt-3">
+                        Upload Document
+                        <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right: Instant Legal Help -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+
+                <div class="card-header bg-primary-subtle border-0 rounded-top-4 p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                <i class="bi bi-chat-dots-fill text-primary me-2"></i>
+                                Instant Legal Help
+                            </h5>
+                            <p class="text-secondary small mb-0">
+                                Get preliminary legal guidance for your problems.
+                            </p>
+                        </div>
+
+                        <span class="badge bg-success rounded-pill">
+                            <i class="bi bi-circle-fill me-1"></i>
+                            Online
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body d-flex flex-column align-items-center justify-content-center text-center p-5">
+                    <i class="bi bi-robot display-1 text-primary mb-4"></i>
+
+                    <h5 class="fw-bold">
+                        Hi! I'm your AI Legal Assistant.
+                    </h5>
+
+                    <p class="text-secondary">
+                        How can I help you today?
+                        <br>
+                        Describe your legal problem in simple language
+                        and get instant guidance.
+                    </p>
+
+                    <a href="{{ url_for('instant_legal_help') }}"
+                       class="btn btn-primary btn-lg mt-3">
+                        <i class="bi bi-chat-dots me-2"></i>
+                        Open Instant Legal Help
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Find a Lawyer + My Issues -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-success-subtle text-success rounded-3 p-3">
+                            <i class="bi bi-person-badge fs-3"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                ⚖️ Find a Lawyer
+                            </h5>
+                            <p class="text-secondary small mb-0">
+                                Explore lawyers by specialization & location.
+                            </p>
+                        </div>
+                    </div>
+
+                    <a href="{{ url_for('search_lawyers') }}"
+                       class="btn btn-success mt-3">
+                        Find Lawyers
+                        <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center rounded-top-4">
+                    <h6 class="mb-0">
+                        <i class="bi bi-list-task me-2"></i>
+                        📋 My Issues
+                    </h6>
+
+                    <a href="{{ url_for('client_legal_issues') }}"
+                       class="btn btn-sm btn-light">
+                        View All
+                    </a>
+                </div>
+
+                <div class="card-body">
+                    {% if recent_issue %}
+                    <div class="p-2 border rounded">
+                        <strong>⚖️ {{ recent_issue.category }}</strong>
+                        <br>
+                        <small class="text-muted">
+                            {{ recent_issue.description[:60] }}...
+                        </small>
+
+                        <a href="{{ url_for('view_legal_issue', issue_id=recent_issue.id) }}"
+                           class="btn btn-sm btn-outline-success float-end">
+                            Open
+                        </a>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">
+                        Classify your Legal Issue and view suggested lawyer profiles.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Appointments + My Cases -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-top-4">
+                    <h6 class="mb-0">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        📅 Recent Appointments
+                    </h6>
+
+                    <a href="{{ url_for('client_appointments') }}"
+                       class="btn btn-sm btn-light">
+                        View All
+                    </a>
+                </div>
+
+                <div class="card-body">
+                    {% if recent_appointment %}
+                    <div class="mb-2 p-2 border rounded">
+                        <strong>Lawyer Consultation</strong>
+
+                        <span class="badge bg-{{ 'warning' if recent_appointment.status == 'pending' else 'success' if recent_appointment.status == 'approved' else 'danger' }} float-end">
+                            {{ recent_appointment.status|title }}
+                        </span>
+
+                        <br>
+                        <small class="text-muted">
+                            {{ recent_appointment.date.strftime('%d %b') }} ·
+                            {{ recent_appointment.time.strftime('%I:%M %p') }}
+                        </small>
+
+                        <br>
+                        <a href="{{ url_for('appointment_chat', appointment_id=recent_appointment.id) }}"
+                           class="btn btn-sm btn-outline-primary mt-1">
+                            💬 Chat
+                        </a>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">No appointments yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center rounded-top-4">
+                    <h6 class="mb-0">
+                        <i class="bi bi-folder2-open me-2"></i>
+                        📁 My Active Cases ({{ active_cases_count }})
+                    </h6>
+
+                    <a href="{{ url_for('client_my_cases') }}"
+                       class="btn btn-sm btn-light">
+                        View All Cases
+                    </a>
+                </div>
+
+                <div class="card-body">
+                    {% if active_case %}
+                    <div class="p-3 border rounded">
+                        <strong>Case #{{ active_case.case_number }}</strong>
+                        <span class="badge bg-primary ms-2">{{ active_case.status }}</span>
+
+                        <br>
+                        <small class="text-muted">
+                            {{ active_case.title }} ·
+                            Created: {{ active_case.created_at.strftime('%d %b %Y') }}
+                        </small>
+
+                        <br>
+                        <a href="{{ url_for('client_my_cases') }}"
+                           class="btn btn-sm btn-outline-primary mt-2">
+                            View Case Workspace
+                        </a>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">
+                        Complete your consultation phase and proceed to track case progress.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 {% endblock %}

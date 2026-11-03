@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Complaints & Helplines{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <h2>📞 Complaints & Helplines</h2>
+
+    <p class="text-muted">
+        Find relevant official services and simple next steps.
+        Local contacts below focus on Gwalior and Madhya Pradesh.
+    </p>
+
+    <div class="alert alert-danger">
+        <strong>Immediate danger or serious injury?</strong>
+        Call <a href="tel:112" class="alert-link">112</a>.
+        This website does not dispatch emergency assistance.
+    </div>
+
+    <div class="alert alert-info">
+        Opening a link here does not file a complaint.
+        Follow the official service’s instructions.
+        Contacts are curated, not checked live on every page visit.
+    </div>
+
+    <div class="row g-4">
+        {% for service in services %}
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-1">{{ service.title }}</h5>
+                    <small class="text-muted">
+                        {{ service.scope }}
+                    </small>
+                </div>
+
+                <div class="card-body">
+                    <h6>How to Get Help / Complain</h6>
+
+                    <ol>
+                        {% for step in service.steps %}
+                        <li class="mb-2">{{ step }}</li>
+                        {% endfor %}
+                    </ol>
+
+                    {% for contact_id in service.contact_ids %}
+                        {% set contact = contacts[contact_id] %}
+
+                    <div class="border rounded p-3 mb-2">
+                        <div class="fw-semibold">
+                            {{ contact.name }}
+                        </div>
+
+                        <p class="small text-muted my-2">
+                            {{ contact.purpose }}
+                        </p>
+
+                        <a href="tel:{{ contact.number }}"
+                           class="btn btn-sm btn-outline-primary">
+                            Call {{ contact.number }}
+                        </a>
+
+                        <a href="{{ contact.url }}"
+                           class="btn btn-sm btn-outline-secondary"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            Official Website
+                        </a>
+                    </div>
+                    {% endfor %}
+
+                    <p class="small text-muted mt-3 mb-0">
+                        {{ service.note }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <a href="{{ url_for('client_dashboard') }}"
+       class="btn btn-secondary mt-4">
+        ← Back to Dashboard
+    </a>
+
+</div>
+{% endblock %}

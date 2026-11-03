@@ -3,8 +3,8 @@
 {% block title %}My Appointments{% endblock %}
 
 {% block content %}
-<div class="py-5">
-    <h1 class="mb-4">📅 My Appointments</h1>
+<div class="container py-4">
+    <h2 class="mb-4">📅 My Appointments</h2>
     
     <div class="card">
         <div class="card-body">
@@ -17,10 +17,13 @@
                         <th>Time</th>
                         <th>Status</th>
                         <th>Reason</th>
+                        <th>Consultation Chat</th>
+                        <th>Review</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for appointment in appointments %}
+                    {% set chat_status = appointment | chat_status %}
                     <tr>
                         <td>{{ appointment.lawyer.name }}</td>
                         <td>{{ appointment.lawyer.specialization or 'Not specified' }}</td>
@@ -28,18 +31,32 @@
                         <td>{{ appointment.time.strftime('%I:%M %p') }}</td>
                         <td>
                             <span class="badge bg-{{ 
-                                'warning' if appointment.status == 'pending' 
-                                else 'success' if appointment.status == 'accepted' 
+                                'warning text-dark' if appointment.status == 'pending' 
+                                else 'success' if appointment.status == 'approved' 
                                 else 'danger' 
                             }}">
-                                {{ appointment.status.title() }}
+                                {{ appointment.status|title }}
                             </span>
                         </td>
-                        <td>{{ appointment.reason[:50] }}...</td>
+                        <td>{{ appointment.reason[:50] }}{% if appointment.reason|length > 50 %}...{% endif %}</td>
+                        <td>
+                            {% if appointment.status == 'approved' %}
+                            <a href="{{ url_for('appointment_chat', appointment_id=appointment.id) }}" class="btn btn-sm btn-info">💬 Chat</a>
+                            {% else %}
+                            <small class="text-muted">-</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if appointment.status == 'approved' and chat_status == 'Completed' %}
+                            <a href="{{ url_for('review_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-warning">⭐ Review</a>
+                            {% else %}
+                            <small class="text-muted">-</small>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" class="text-center text-muted">No appointments yet</td>
+                        <td colspan="8" class="text-center text-muted">No appointments yet</td>
                     </tr>
                     {% endfor %}
                 </tbody>

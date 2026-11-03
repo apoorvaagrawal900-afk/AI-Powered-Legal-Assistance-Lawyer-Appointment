@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Retry Legal Help{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card">
+        <div class="card-body">
+            <h4>Guidance could not be generated</h4>
+
+            <p class="text-muted">
+                Your previous saved messages are unchanged.
+                Your current question is preserved below.
+            </p>
+
+            <div class="alert alert-danger">
+                If there is immediate danger, call
+                <a href="tel:112" class="alert-link">112</a>.
+                Do not wait for the AI.
+            </div>
+
+            <form method="POST"
+                  action="{{ url_for('send_legal_help_message',
+                                     conversation_id=conversation.id) }}">
+                <input type="hidden"
+                       name="legal_help_csrf"
+                       value="{{ form_token }}">
+
+                <textarea name="message"
+                          class="form-control mb-3"
+                          rows="5"
+                          maxlength="4000"
+                          required>{{ question }}</textarea>
+
+                <button type="submit" class="btn btn-primary">
+                    Retry
+                </button>
+
+                <a href="{{ url_for('instant_legal_help',
+                                    chat_id=conversation.id) }}"
+                   class="btn btn-outline-secondary">
+                    Back to Conversation
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

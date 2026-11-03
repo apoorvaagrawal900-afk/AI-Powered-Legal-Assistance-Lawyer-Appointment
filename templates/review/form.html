@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Review{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 600px;">
+    <h2 class="mb-4">⭐ Submit Review</h2>
+    
+    {% if context_type == 'case' %}
+    <p class="text-muted">Case: <strong>{{ context.case_number }}</strong> · Lawyer: <strong>{{ context.lawyer.name }}</strong></p>
+    {% else %}
+    <p class="text-muted">Consultation: <strong>{{ context.date.strftime('%d %b %Y') }}</strong> · Lawyer: <strong>{{ context.lawyer.name }}</strong></p>
+    {% endif %}
+    
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Rating</label>
+            <select name="rating" class="form-select" required>
+                <option value="">Select rating</option>
+                <option value="5">⭐⭐⭐⭐⭐ Excellent (5)</option>
+                <option value="4">⭐⭐⭐⭐ Very Good (4)</option>
+                <option value="3">⭐⭐⭐ Good (3)</option>
+                <option value="2">⭐⭐ Fair (2)</option>
+                <option value="1">⭐ Poor (1)</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Comment (optional)</label>
+            <textarea name="comment" class="form-control" rows="3" placeholder="Share your experience..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Review</button>
+        <a href="{{ url_for('client_dashboard') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

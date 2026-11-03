@@ -4,23 +4,251 @@
 
 {% block content %}
 <div class="container py-5">
-    <h1 class="mb-4">📤 Upload Legal Document</h1>
-    
-    <div class="card">
-        <div class="card-body">
-            <form method="POST" enctype="multipart/form-data">
+    <h1 class="mb-1">📤 Upload Legal Document</h1>
+    <p class="text-muted mb-4">
+        Upload a PDF, review sensitive information, then start AI analysis.
+    </p>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+
+            <form id="document-form"
+                  method="POST"
+                  enctype="multipart/form-data">
+
                 <div class="mb-3">
-                    <label class="form-label">Select PDF File</label>
-                    <input type="file" name="file" class="form-control" accept=".pdf" required>
-                    <small class="text-muted">Only PDF files are supported</small>
+                    <label class="form-label fw-semibold">
+                        Select PDF File
+                    </label>
+
+                    <input type="file"
+                           id="document-file"
+                           name="file"
+                           class="form-control"
+                           accept=".pdf"
+                           required>
+
+                    <small class="text-muted d-block mt-1">
+                        Only PDF files are supported.
+                    </small>
                 </div>
-                <button type="submit" class="btn btn-primary">Upload & Summarize</button>
+
+                <!-- Step 1: Preview -->
+                <button type="button"
+                        id="preview-btn"
+                        class="btn btn-outline-primary">
+                    <i class="bi bi-eye me-2"></i>
+                    Show Privacy Preview
+                </button>
+
+                <!-- Preview Section -->
+                <div id="privacy-preview"
+                     class="border rounded-4 p-3 mt-4 bg-light d-none">
+
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-shield-lock me-2"></i>
+                        Smart Privacy Shield Preview
+                    </h6>
+
+                    <p class="small text-muted">
+                        Review the detected information. Selected items will be
+                        masked before the document is sent for AI analysis.
+                    </p>
+
+                    <div id="preview-results"></div>
+
+                    <div class="form-check mt-3">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="mask_names"
+                               name="mask_names"
+                               checked>
+                        <label class="form-check-label" for="mask_names">
+                            Mask detected personal names as PARTY_A, PARTY_B
+                        </label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="mask_aadhaar"
+                               name="mask_aadhaar"
+                               checked>
+                        <label class="form-check-label" for="mask_aadhaar">
+                            Mask Aadhaar numbers
+                        </label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="mask_pan"
+                               name="mask_pan"
+                               checked>
+                        <label class="form-check-label" for="mask_pan">
+                            Mask PAN numbers
+                        </label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="mask_phone"
+                               name="mask_phone"
+                               checked>
+                        <label class="form-check-label" for="mask_phone">
+                            Mask phone numbers
+                        </label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="mask_email"
+                               name="mask_email"
+                               checked>
+                        <label class="form-check-label" for="mask_email">
+                            Mask email addresses
+                        </label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="mask_account"
+                               name="mask_account"
+                               checked>
+                        <label class="form-check-label" for="mask_account">
+                            Mask bank account-like numbers
+                        </label>
+                    </div>
+
+                    <div class="alert alert-warning small mt-3 mb-3">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Automated detection may not identify information inside
+                        scanned images, signatures, stamps or PDF metadata.
+                        Upload only necessary documents.
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="privacy_consent"
+                               name="privacy_consent"
+                               required>
+                        <label class="form-check-label" for="privacy_consent">
+                            I understand that the selected masked document text
+                            will be sent to an external AI service for analysis.
+                        </label>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary mt-3"
+                            id="upload-btn">
+                        <i class="bi bi-cloud-arrow-up me-2"></i>
+                        Upload & Summarize
+                    </button>
+                </div>
             </form>
         </div>
     </div>
-    
+
     <div class="mt-4">
-        <a href="{{ url_for('client_documents') }}" class="btn btn-secondary">← Back to Documents</a>
+        <a href="{{ url_for('client_documents') }}"
+           class="btn btn-secondary">
+            ← Back to Documents
+        </a>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const fileInput = document.getElementById('document-file');
+    const previewBtn = document.getElementById('preview-btn');
+    const previewBox = document.getElementById('privacy-preview');
+    const previewResults = document.getElementById('preview-results');
+
+    previewBtn.addEventListener('click', function () {
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert('Please choose a PDF file first.');
+            return;
+        }
+
+        previewResults.innerHTML = `
+            <div class="text-center py-3">
+                <div class="spinner-border text-primary" role="status"></div>
+                <div class="small text-muted mt-2">
+                    Reading document for privacy preview...
+                </div>
+            </div>
+        `;
+
+        previewBox.classList.remove('d-none');
+
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            // Basic browser-side preview.
+            // Final masking will be applied securely on the server.
+            const text = String(event.target.result || '');
+
+            const aadhaar = (text.match(/\b\d{4}\s?\d{4}\s?\d{4}\b/g) || []).length;
+            const pan = (text.match(/\b[A-Z]{5}\d{4}[A-Z]\b/g) || []).length;
+            const phone = (text.match(/\b(?:\+91[\-\s]?)?[6-9]\d{9}\b/g) || []).length;
+            const email = (text.match(/[\w.-]+@[\w.-]+\.\w+/g) || []).length;
+            const account = (text.match(/\b\d{9,18}\b/g) || []).length;
+
+            previewResults.innerHTML = `
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 bg-white">
+                            <strong>Will be masked</strong>
+                            <ul class="small mb-0 mt-2">
+                                <li>Aadhaar-like numbers: ${aadhaar}</li>
+                                <li>PAN-like numbers: ${pan}</li>
+                                <li>Phone numbers: ${phone}</li>
+                                <li>Email addresses: ${email}</li>
+                                <li>Account-like numbers: ${account}</li>
+                                <li>Personal names: detected after server-side review</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 bg-white">
+                            <strong>Will be preserved</strong>
+                            <ul class="small mb-0 mt-2">
+                                <li>Clause numbers and headings</li>
+                                <li>Agreement dates and deadlines</li>
+                                <li>Payment amounts and obligations</li>
+                                <li>Property or agreement details</li>
+                                <li>Legal terms and responsibilities</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info small mt-3 mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Example mapping: Rohit → PARTY_A,
+                    1234 5678 9012 → [AADHAAR_REDACTED].
+                </div>
+            `;
+        };
+
+        reader.onerror = function () {
+            previewResults.innerHTML = `
+                <div class="alert alert-warning mb-0">
+                    Could not read the selected file for preview.
+                    You may still upload it, but review it carefully first.
+                </div>
+            `;
+        };
+
+        reader.readAsText(file);
+    });
+</script>
 {% endblock %}

@@ -3,39 +3,74 @@
 {% block title %}Book Appointment{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">📅 Book Appointment</h4>
+<div class="container py-5">
+    <h1 class="mb-4">📅 Book an Appointment</h1>
+    
+    <div class="card">
+        <div class="card-body">
+            <!-- Selected Lawyer -->
+            <div class="mb-4 p-3 bg-light rounded">
+                <h5>Selected Lawyer</h5>
+                <p class="mb-1"><strong>{{ lawyer.name }}</strong></p>
+                <p class="mb-0 text-muted">{{ lawyer.specialization or 'Not specified' }} · {{ lawyer.experience or 'N/A' }} yrs experience</p>
             </div>
-            <div class="card-body">
-                <h5>{{ lawyer.name }}</h5>
-                <p class="text-muted">
-                    {{ lawyer.specialization }} | {{ lawyer.experience_years }} years | ₹{{ lawyer.fees }}
-                </p>
+            
+            <form method="POST">
+                <!-- Legal Issue Dropdown -->
+                <!-- Lawyer's Specialization (Auto-filled, read-only) -->
+                <div class="mb-3">
+                    <label class="form-label">Legal Category</label>
+                    <input type="text" class="form-control" value="{{ lawyer.specialization or 'Not specified' }}" readonly>
+                    <small class="text-muted">This lawyer specializes in {{ lawyer.specialization or 'general legal matters' }}</small>
+                </div>
                 
-                <form method="POST">
-                    <div class="mb-3">
-                        <label class="form-label">Date *</label>
-                        <input type="date" name="date" class="form-control" required min="{{ today }}">
+                <!-- Available Slots -->
+                <div class="mb-3">
+                    <label class="form-label">Available Time Slots</label>
+                    {% if available_slots %}
+                    <div class="row g-2">
+                        {% for slot in available_slots %}
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="slot_id" value="{{ slot.id }}" id="slot{{ slot.id }}" required>
+                                <label class="form-check-label" for="slot{{ slot.id }}">
+                                    {{ slot.date.strftime('%d %b %Y') }} · {{ slot.start_time.strftime('%I:%M %p') }}-{{ slot.end_time.strftime('%I:%M %p') }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Time *</label>
-                        <input type="time" name="time" class="form-control" required>
+                    {% else %}
+                    <p class="text-muted">No available slots. Lawyer hasn't added availability yet.</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Consultation Mode -->
+                <div class="mb-3">
+                    <label class="form-label">Consultation Mode</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="mode" value="online" id="modeOnline" checked>
+                        <label class="form-check-label" for="modeOnline">💻 Online</label>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Reason *</label>
-                        <textarea name="reason" class="form-control" rows="4" placeholder="Describe your legal issue..." required></textarea>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="mode" value="in-person" id="modeInPerson">
+                        <label class="form-check-label" for="modeInPerson">🏢 In-person - at lawyer's office</label>
                     </div>
-                    
-                    <button type="submit" class="btn btn-success">📅 Book Appointment</button>
-                    <a href="{{ url_for('search_lawyers') }}" class="btn btn-secondary">Cancel</a>
-                </form>
-            </div>
+                </div>
+                
+                <!-- Brief Note -->
+                <div class="mb-3">
+                    <label class="form-label">Brief Note (Optional)</label>
+                    <textarea name="note" class="form-control" rows="3" placeholder="Any additional info the lawyer should know..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" {% if not available_slots %}disabled{% endif %}>Send Booking Request</button>
+            </form>
         </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ url_for('client_dashboard') }}" class="btn btn-secondary">← Back</a>
     </div>
 </div>
 {% endblock %}

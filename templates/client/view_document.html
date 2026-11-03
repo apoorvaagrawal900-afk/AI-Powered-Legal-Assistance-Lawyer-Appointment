@@ -3,60 +3,171 @@
 {% block title %}Document Summary & Q&A{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <h1 class="mb-4">📄 {{ document.filename }}</h1>
-    
-    <!-- Summary Section -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">📝 AI Summary</h5>
+<div class="container py-4 py-lg-5">
+
+    <!-- Page Heading -->
+    <div class="mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-primary-subtle text-primary rounded-3 p-3">
+                <i class="bi bi-file-earmark-text fs-3"></i>
+            </div>
+
+            <div>
+                <h1 class="fw-bold mb-1">
+                    {{ document.filename }}
+                </h1>
+                <p class="text-secondary mb-0">
+                    AI summary, important clauses and document-based Q&A.
+                </p>
+            </div>
         </div>
-        <div class="card-body">
+    </div>
+
+    <!-- Summary Section -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom rounded-top-4 p-3">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-robot text-primary fs-5"></i>
+                <h5 class="fw-bold mb-0">AI Summary</h5>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
             {% if document.summary %}
-            <div style="white-space: pre-line;">{{ document.summary }}</div>
+            <div style="white-space: pre-line;">
+                {{ document.summary }}
+            </div>
             {% else %}
-            <p class="text-muted">No summary available.</p>
+            <div class="text-center py-4">
+                <i class="bi bi-file-earmark-text display-6 text-secondary"></i>
+                <p class="text-muted mt-3 mb-0">
+                    No summary available.
+                </p>
+            </div>
             {% endif %}
         </div>
     </div>
-    
-    <!-- Q&A Chat Section -->
-    <div class="card mb-4">
-        <div class="card-header bg-success text-white">
-            <h5 class="mb-0">💬 Ask Questions About This Document</h5>
+
+    <!-- Create Legal Issue -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-warning-subtle text-warning rounded-3 p-3">
+                    <i class="bi bi-plus-circle fs-3"></i>
+                </div>
+
+                <div>
+                    <h5 class="fw-bold mb-1">Create Legal Issue</h5>
+                    <p class="text-secondary small mb-0">
+                        Create a legal issue using this document’s analysis.
+                    </p>
+                </div>
+            </div>
+
+            <a href="{{ url_for('create_legal_issue', doc_id=document.id) }}"
+               class="btn btn-warning">
+                <i class="bi bi-plus-lg me-2"></i>
+                Create Legal Issue
+            </a>
         </div>
-        <div class="card-body">
+    </div>
+
+    <!-- Q&A Section -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom rounded-top-4 p-3">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-chat-dots text-success fs-5"></i>
+                <h5 class="fw-bold mb-0">
+                    Ask Questions About This Document
+                </h5>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+
             <!-- Chat History -->
-            <div class="mb-4" style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+            <div class="border rounded-4 bg-light p-3 mb-4"
+                 style="max-height: 500px; overflow-y: auto;">
+
                 {% if questions %}
                     {% for qa in questions %}
-                    <div class="mb-3">
-                        <div class="alert alert-info">
-                            <strong>❓ You:</strong> {{ qa.question }}
-                        </div>
-                        <div class="alert alert-success">
-                            <strong>🤖 AI:</strong>
-                            <div style="white-space: pre-line;">{{ qa.answer }}</div>
+
+                    <!-- User Question -->
+                    <div class="d-flex justify-content-end mb-3">
+                        <div class="bg-primary text-white rounded-4 p-3"
+                             style="max-width: 85%;">
+                            <div class="small opacity-75 mb-1">
+                                <i class="bi bi-person-circle me-1"></i>
+                                You
+                            </div>
+
+                            <div style="white-space: pre-wrap;">
+                                {{ qa.question }}
+                            </div>
                         </div>
                     </div>
+
+                    <!-- AI Answer -->
+                    <div class="d-flex mb-4">
+                        <div class="bg-white border rounded-4 p-3 flex-grow-1"
+                             style="max-width: 85%;">
+                            <div class="small text-success fw-semibold mb-1">
+                                <i class="bi bi-robot me-1"></i>
+                                AI Assistant
+                            </div>
+
+                            <div style="white-space: pre-wrap;">
+                                {{ qa.answer }}
+                            </div>
+                        </div>
+                    </div>
+
                     {% endfor %}
                 {% else %}
-                <p class="text-muted text-center">No questions asked yet. Start by asking your first question below!</p>
+
+                <div class="text-center py-4">
+                    <i class="bi bi-chat-square-text display-6 text-secondary"></i>
+                    <p class="text-muted mt-3 mb-0">
+                        No questions asked yet.
+                        Start by asking your first question below.
+                    </p>
+                </div>
+
                 {% endif %}
             </div>
-            
+
             <!-- Ask Question Form -->
-            <form method="POST" action="{{ url_for('ask_document_question', doc_id=document.id) }}">
-                <div class="mb-3">
-                    <textarea name="question" class="form-control" rows="3" placeholder="E.g., What is the main clause about termination? What are the payment terms?" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-success">💬 Ask Question</button>
+            <form method="POST"
+                  action="{{ url_for('ask_document_question', doc_id=document.id) }}">
+
+                <label for="document-question"
+                       class="form-label fw-semibold">
+                    Your question
+                </label>
+
+                <textarea id="document-question"
+                          name="question"
+                          class="form-control mb-3"
+                          rows="3"
+                          placeholder="E.g., What is the main clause about termination? What are the payment terms?"
+                          required></textarea>
+
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-send me-2"></i>
+                    Ask Question
+                </button>
             </form>
+
         </div>
     </div>
-    
-    <div class="mt-4">
-        <a href="{{ url_for('client_documents') }}" class="btn btn-secondary">← Back to Documents</a>
-    </div>
+
+    <!-- Back Button -->
+    <a href="{{ url_for('client_documents') }}"
+       class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-2"></i>
+        Back to Documents
+    </a>
+
 </div>
 {% endblock %}
+

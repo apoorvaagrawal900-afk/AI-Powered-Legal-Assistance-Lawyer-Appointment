@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Case Monitoring{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">📁 Case Monitoring</h2>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Case #</th>
+                        <th>Title</th>
+                        <th>Client</th>
+                        <th>Lawyer</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for case in cases %}
+                    <tr>
+                        <td>{{ case.case_number }}</td>
+                        <td>{{ case.title }}</td>
+                        <td>{{ case.client.name }}</td>
+                        <td>{{ case.lawyer.name }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'primary' if case.status == 'In Progress' else 'secondary' }}">
+                                {{ case.status }}
+                            </span>
+                        </td>
+                        <td>{{ case.created_at.strftime('%d %b %Y') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-center text-muted">No cases yet</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

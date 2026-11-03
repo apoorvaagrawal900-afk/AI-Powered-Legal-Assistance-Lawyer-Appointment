@@ -33,7 +33,7 @@
                         <small class="text-muted">Years of practice experience</small>
                     </div>
                     
-                    <!-- Fees -->
+                    <!-- Fees --> 
                     <div class="mb-3">
                         <label class="form-label">Consultation Fees (₹) *</label>
                         <input type="number" name="fees" class="form-control" value="{{ lawyer.fees or 0 }}" min="0" step="100" required>
@@ -65,8 +65,73 @@
                         <a href="{{ url_for('lawyer_dashboard') }}" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
+
+                <hr>
+<!-- Availability Section -->
+<!-- <div class="card mt-4"> -->
+    <!-- <div class="card-header bg-primary text-white"> -->
+        <!-- <h5 class="mb-0">📅 My Availability (30-min consultation slots)</h5> -->
+    <!-- </div> -->
+    <!-- <div class="card-body"> -->
+        <!-- Add Slots Form -->
+        <!-- <form method="POST" action="{{ url_for('lawyer_availability') }}" class="mb-4"> -->
+            <!-- <div class="row g-3"> -->
+                <!-- <div class="col-md-4"> -->
+                    <!-- <label class="form-label">Date</label> -->
+                    <!-- <input type="date" name="date" class="form-control" required> -->
+                <!-- </div> -->
+                <!-- <div class="col-md-4"> -->
+                    <!-- <label class="form-label">Start Time</label> -->
+                    <!-- <select name="start_hour" class="form-select" required> -->
+                        <!-- {% for h in range(9, 18) %} -->
+                        <!-- <option value="{{ h }}">{{ '%02d'|format(h) }}:00</option> -->
+                        <!-- {% endfor %} -->
+                    <!-- </select> -->
+                <!-- </div> -->
+                <!-- <div class="col-md-4"> -->
+                    <!-- <label class="form-label">End Time</label> -->
+                    <!-- <select name="end_hour" class="form-select" required> -->
+                        <!-- {% for h in range(10, 19) %} -->
+                        <!-- <option value="{{ h }}">{{ '%02d'|format(h) }}:00</option> -->
+                        <!-- {% endfor %} -->
+                    <!-- </select> -->
+                <!-- </div> -->
+            <!-- </div> -->
+            <!-- <button type="submit" class="btn btn-primary mt-3">➕ Add Available Slots</button> -->
+            <!-- <small class="text-muted d-block mt-1">30-minute slots automatically generate honge</small> -->
+        <!-- </form> -->
+        <!--  -->
+        <!-- Existing Slots -->
+        <!-- <h6>My Slots</h6> -->
+        <!-- <table class="table table-sm table-striped"> -->
+            <!-- <thead> -->
+                <!-- <tr> -->
+                    <!-- <th>Date</th> -->
+                    <!-- <th>Time</th> -->
+                    <!-- <th>Status</th> -->
+                <!-- </tr> -->
+            <!-- </thead> -->
+            <!-- <tbody> -->
+                <!-- {% for slot in slots %} -->
+                <!-- <tr> -->
+                    <!-- <td>{{ slot.date.strftime('%d %b %Y') }}</td> -->
+                    <!-- <td>{{ slot.start_time.strftime('%I:%M %p') }} - {{ slot.end_time.strftime('%I:%M %p') }}</td> -->
+                    <!-- <td> -->
+                        <!-- <span class="badge bg-{{ 'success' if not slot.is_booked else 'danger' }}"> -->
+                            <!-- {{ 'Available' if not slot.is_booked else 'Booked' }} -->
+                        <!-- </span> -->
+                    <!-- </td> -->
+                <!-- </tr> -->
+                <!-- {% else %} -->
+                <!-- <tr><td colspan="3" class="text-muted">No slots added yet</td></tr> -->
+                <!-- {% endfor %} -->
+            <!-- </tbody> -->
+        <!-- </table> -->
+    <!-- </div> -->
+<!-- </div> -->
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}

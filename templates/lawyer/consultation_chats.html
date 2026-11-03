@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Consultation Chats{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">💬 Consultation Chats</h2>
+    
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">All Consultations ({{ appointments|length }})</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Reason</th>
+                        <th>Chat Status</th>
+                        <th>Chat</th>
+                        <th>Review</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in appointments %}
+                    {% set chat_status = appointment | chat_status %}
+                    <tr>
+                        <td>{{ appointment.client.name }}</td>
+                        <td>{{ appointment.date.strftime('%d %b %Y') }}</td>
+                        <td>{{ appointment.time.strftime('%I:%M %p') }}</td>
+                        <td>{{ appointment.reason[:40] if appointment.reason else '-' }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if chat_status == 'Active' else 'secondary' if chat_status == 'Completed' else 'info' }}">
+                                {{ chat_status }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if chat_status != 'Upcoming' %}
+                            <a href="{{ url_for('appointment_chat', appointment_id=appointment.id) }}" class="btn btn-sm btn-outline-success">💬 Open Chat</a>
+                            {% else %}
+                            <small class="text-muted">Opens on consultation date</small>
+                            {% endif %}
+                            
+                        </td>
+                        <td>
+                            {% set avg, count = get_lawyer_rating(appointment.lawyer_id) %}
+{% if count > 0 %}
+<small class="text-muted">⭐ {{ avg }} ({{ count }})</small>
+{% else %}
+<small class="text-muted">-</small>
+{% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No approved consultations yet</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ url_for('lawyer_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

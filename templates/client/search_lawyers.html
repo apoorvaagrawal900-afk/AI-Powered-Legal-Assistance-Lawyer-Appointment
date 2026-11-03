@@ -47,17 +47,37 @@
             {% for lawyer in lawyers %}
             <div class="col-md-6 mb-4">
                 <div class="card">
+                    <!-- <div class="card-body"> -->
+                        <!-- <h5 class="card-title">{{ lawyer.name }}</h5> -->
+                        <!-- <p class="card-text"> -->
+                            <!-- <strong>Specialization:</strong> {{ lawyer.specialization or 'Not specified' }}<br> -->
+                            <!-- <strong>Experience:</strong> {{ lawyer.experience_years }} years<br> -->
+                            <!-- <strong>Fees:</strong> ₹{{ lawyer.fees }} per session<br> -->
+                            <!-- <strong>Location:</strong> {{ lawyer.location or 'Not specified' }}<br> -->
+                            <!-- <strong>Rating:</strong> ⭐ 4.5 -->
+                        <!-- </p> -->
+                        <!-- <a href="#" class="btn btn-primary">View Profile</a> -->
+                        <!-- <a href="{{ url_for('book_appointment', lawyer_id=lawyer.id) }}" class="btn btn-success">📅 Book Appointment</a> -->
+                    <!-- </div> -->
                     <div class="card-body">
                         <h5 class="card-title">{{ lawyer.name }}</h5>
+
                         <p class="card-text">
                             <strong>Specialization:</strong> {{ lawyer.specialization or 'Not specified' }}<br>
                             <strong>Experience:</strong> {{ lawyer.experience_years }} years<br>
                             <strong>Fees:</strong> ₹{{ lawyer.fees }} per session<br>
                             <strong>Location:</strong> {{ lawyer.location or 'Not specified' }}<br>
-                            <strong>Rating:</strong> ⭐ 4.5
+                        {% set avg, count = get_lawyer_rating(lawyer.id) %}
+                            <strong>Rating:</strong>
+                        {% if count > 0 %}
+                            ⭐ {{ avg }} ({{ count }} review{{ 's' if count != 1 }})
+                        {% else %}
+                            <span class="text-muted">NA</span>
+                        {% endif %}
                         </p>
-                        <a href="#" class="btn btn-primary">View Profile</a>
-                        <a href="{{ url_for('book_appointment', lawyer_id=lawyer.id) }}" class="btn btn-success">📅 Book Appointment</a>
+                        
+                            <a href="#" class="btn btn-primary">View Profile</a>
+                            <a href="{{ url_for('book_appointment', lawyer_id=lawyer.id) }}" class="btn btn-success">📅 Book Appointment</a>
                     </div>
                 </div>
             </div>

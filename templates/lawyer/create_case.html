@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Create New Case{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">➕ Create New Case</h2>
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Select Client</label>
+                    <select name="client_id" class="form-select" required>
+                        <option value="">-- Select Client --</option>
+                        {% for client in clients %}
+                        <option value="{{ client.id }}">{{ client.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Case Title</label>
+                    <input type="text" name="title" class="form-control" placeholder="e.g., Property Dispute" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Case Category</label>
+                    <select name="category" class="form-select" required>
+                        <option value="Property">Property</option>
+                        <option value="Employment">Employment</option>
+                        <option value="Family">Family</option>
+                        <option value="Criminal">Criminal</option>
+                        <option value="Consumer">Consumer</option>
+                        <option value="Corporate">Corporate</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Case</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ url_for('lawyer_my_cases') }}" class="btn btn-secondary">← Back to My Cases</a>
+    </div>
+</div>
+{% endblock %}

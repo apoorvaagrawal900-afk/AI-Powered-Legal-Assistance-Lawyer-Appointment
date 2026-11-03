@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}My Cases{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">📁 My Cases</h2>
+    
+    {% for case in cases %}
+    <div class="card mb-3">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <strong>Case #{{ case.case_number }}</strong>
+                <span class="badge bg-{{ 'primary' if case.status == 'In Progress' else 'secondary' }} ms-2">{{ case.status }}</span>
+                <br><small class="text-muted">{{ case.title }} · Created: {{ case.created_at.strftime('%d %b %Y') }}</small>
+            </div>
+            <a href="{{ url_for('case_workspace', case_id=case.id) }}" class="btn btn-sm btn-outline-primary">Open Case Workspace</a>
+            {% if case.status == 'Closed' %}
+                
+<a href="{{ url_for('review_case', case_id=case.id) }}" class="btn btn-sm btn-warning ms-2">⭐ Review</a>
+{% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">No cases yet.</div>
+    {% endfor %}
+    
+    <div class="mt-4">
+        <a href="{{ url_for('client_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

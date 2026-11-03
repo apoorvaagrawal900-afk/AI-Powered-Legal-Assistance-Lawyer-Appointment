@@ -1,0 +1,495 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ guide.title }} — Complaint Help
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 py-lg-5">
+
+    <!-- Heading -->
+    <div class="mb-4">
+        <div class="d-flex align-items-center gap-3 mb-2">
+            <div class="bg-primary-subtle text-primary rounded-3 p-3">
+                <i class="bi bi-file-earmark-text fs-3"></i>
+            </div>
+
+            <div>
+                <h2 class="fw-bold mb-1">{{ guide.title }}</h2>
+                <p class="text-secondary mb-0">
+                    {{ guide.destination }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language, official website and contacts -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a href="{{ url_for('complaint_procedure', slug=slug, lang='en') }}"
+           class="btn btn-sm {% if language == 'en' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            English
+        </a>
+
+        <a href="{{ url_for('complaint_procedure', slug=slug, lang='hi') }}"
+           class="btn btn-sm {% if language == 'hi' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            Hindi / Hinglish
+        </a>
+
+        <a href="{{ guide.portal }}"
+           class="btn btn-sm btn-outline-secondary"
+           target="_blank"
+           rel="noopener noreferrer">
+            <i class="bi bi-box-arrow-up-right me-1"></i>
+            Official Website
+        </a>
+
+        {% for label, number in guide.phones %}
+        <a href="tel:{{ number }}"
+           class="btn btn-sm btn-outline-danger">
+            <i class="bi bi-telephone-fill me-1"></i>
+            {{ label }}: {{ number }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Emergency notice -->
+    <div class="alert alert-danger border-0 rounded-3 shadow-sm">
+        <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+
+            <div>
+                {% if language == 'hi' %}
+                <strong>Immediate danger ya serious injury?</strong>
+                <a href="tel:112" class="alert-link">112</a> call karein.
+                Documents ya AI answer ke liye urgent help delay na karein.
+                {% else %}
+                <strong>Immediate danger or serious injury?</strong>
+                Call <a href="tel:112" class="alert-link">112</a>.
+                Do not delay urgent help for documents or an AI answer.
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- General Procedure -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom rounded-top-4 p-3">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-list-check text-primary fs-5"></i>
+                <h5 class="fw-bold mb-0">
+                    {% if language == 'hi' %}
+                    General Procedure: Step-by-step
+                    {% else %}
+                    General Step-by-step Procedure
+                    {% endif %}
+                </h5>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <ol class="mb-0">
+                {% for step in guide.steps %}
+                <li class="mb-3">
+                    {{ step[language_index] }}
+                </li>
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
+
+    <!-- Documents / information checklist -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom rounded-top-4 p-3">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-folder-check text-success fs-5"></i>
+                <h5 class="fw-bold mb-0">
+                    {% if language == 'hi' %}
+                    Documents / Information Ready Rakhein
+                    {% else %}
+                    Documents / Information to Prepare
+                    {% endif %}
+                </h5>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <ul class="mb-3">
+                {% for document in guide.documents %}
+                <li class="mb-2">
+                    {{ document[language_index] }}
+                </li>
+                {% endfor %}
+            </ul>
+
+            <p class="small text-muted mb-0">
+                {% if language == 'hi' %}
+                Yeh preparation suggestions hain.
+                Actual requirements authority aur situation par depend karti hain.
+                {% else %}
+                These are preparation suggestions.
+                Actual requirements depend on the authority and circumstances.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Category-specific notes -->
+    <div class="alert alert-warning border-0 rounded-3 shadow-sm">
+        <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-info-circle-fill fs-5"></i>
+            <div>{{ guide.notes }}</div>
+        </div>
+    </div>
+
+    <!-- Official reference -->
+    <p class="small text-muted">
+        <a href="{{ guide.source }}"
+           target="_blank"
+           rel="noopener noreferrer">
+            <i class="bi bi-box-arrow-up-right me-1"></i>
+            Official Reference
+        </a>.
+
+        {% if language == 'hi' %}
+        Yeh curated guidance hai, website ki live screen nahi.
+        Portal ke labels aur procedures change ho sakte hain.
+        {% else %}
+        Curated guidance—not a live view of the website.
+        Portal labels and procedures may change.
+        {% endif %}
+    </p>
+
+    <!-- Complaint form-filling chat -->
+    <div class="card shadow-sm border-0 rounded-4 mt-4">
+        <div class="card-header bg-white border-bottom rounded-top-4 p-3">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-robot text-primary fs-5"></i>
+                <h5 class="fw-bold mb-0">
+                    {% if language == 'hi' %}
+                    Complaint Form Bharne Mein Help
+                    {% else %}
+                    Help Filling Your Complaint
+                    {% endif %}
+                </h5>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+
+            <div class="alert alert-info border-0 rounded-3">
+                <div class="d-flex align-items-start gap-2">
+                    <i class="bi bi-lightbulb-fill"></i>
+
+                    <div>
+                        {% if language == 'hi' %}
+                        Apni problem short mein batayein ya jis form field mein
+                        help chahiye uska naam likhein. Assistant ek-ek step mein
+                        help karega. Actual OTP, PIN ya password share na karein.
+                        {% else %}
+                        Briefly describe your problem or name the form field you
+                        need help with. The assistant will guide you one step at
+                        a time. Do not share actual OTPs, PINs or passwords.
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% if guide.examples %}
+            <div class="mb-3">
+                <h6 class="fw-bold">
+                    <i class="bi bi-tags me-2"></i>
+                    {% if language == 'hi' %}
+                    Is Category Ke Examples
+                    {% else %}
+                    Examples in This Category
+                    {% endif %}
+                </h6>
+
+                <ul class="small mb-0">
+                    {% for example in guide.examples %}
+                    <li>{{ example }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <p class="small text-muted">
+                {% if language == 'hi' %}
+                Yeh chat project database mein save nahi hoti.
+                Refresh, language change ya page chhodne par chat clear ho jayegi.
+                Questions aur recent context Gemini ko bheje jaate hain.
+                Actual OTP, PIN, password, full account/card details, identity
+                numbers ya sensitive documents share na karein.
+                {% else %}
+                This chat is not saved in the project database.
+                Refreshing, changing language, or leaving clears the chat.
+                Questions and recent context are sent to Gemini.
+                Do not share actual OTPs, PINs, passwords, full account/card
+                details, identity numbers, or sensitive documents.
+                {% endif %}
+            </p>
+
+            <!-- Messages -->
+            <div id="complaint-chat"
+                 aria-live="polite"
+                 aria-relevant="additions"
+                 class="mb-3">
+            </div>
+
+            <!-- Error feedback -->
+            <div id="complaint-error"
+                 class="alert alert-warning d-none"
+                 role="alert">
+            </div>
+
+            <!-- Message form -->
+            <form id="complaint-form"
+                  action="{{ url_for('ask_complaint_procedure', slug=slug) }}"
+                  method="POST"
+                  data-language="{{ language }}">
+
+                <input type="hidden"
+                       name="legal_help_csrf"
+                       value="{{ form_token }}">
+
+                <label for="complaint-question" class="form-label">
+                    {% if language == 'hi' %}
+                    Aapki Problem / Form Ka Question
+                    {% else %}
+                    Your Problem / Form Question
+                    {% endif %}
+                </label>
+
+                <textarea id="complaint-question"
+                          name="question"
+                          class="form-control mb-3"
+                          rows="3"
+                          maxlength="2000"
+                          placeholder="{% if language == 'hi' %}Example: OTP scam hua hai, form mein kya fill karun?{% else %}Example: I experienced an OTP scam. What should I fill in?{% endif %}"
+                          required></textarea>
+
+                <button id="complaint-send"
+                        type="submit"
+                        class="btn btn-primary">
+                    <i class="bi bi-send me-2"></i>
+                    {% if language == 'hi' %}
+                    Question Bhejein
+                    {% else %}
+                    Send Question
+                    {% endif %}
+                </button>
+            </form>
+
+            <p class="small text-muted mt-3 mb-0">
+                {% if language == 'hi' %}
+                General procedural information—not final legal advice.
+                Yeh assistant complaint automatically file nahi karta
+                aur portal ki live screen nahi dekh sakta.
+                {% else %}
+                General procedural information, not final legal advice.
+                This assistant does not automatically file complaints
+                and cannot see the portal's live screen.
+                {% endif %}
+            </p>
+
+        </div>
+    </div>
+
+    <!-- Back navigation -->
+    <a href="{{ url_for('complaint_assistant') }}"
+       class="btn btn-secondary mt-4">
+        <i class="bi bi-arrow-left me-2"></i>
+        {% if language == 'hi' %}
+        Complaint Types Par Wapas
+        {% else %}
+        Back to Complaint Types
+        {% endif %}
+    </a>
+
+</div>
+
+<script>
+(() => {
+    "use strict";
+
+    const form = document.getElementById("complaint-form");
+    const input = document.getElementById("complaint-question");
+    const chat = document.getElementById("complaint-chat");
+    const errorBox = document.getElementById("complaint-error");
+    const sendButton = document.getElementById("complaint-send");
+
+    if (!form || !input || !chat || !errorBox || !sendButton) {
+        return;
+    }
+
+    const endpoint = form.action;
+    const language = form.dataset.language || "en";
+    const isHindi = language === "hi";
+
+    const history = [];
+
+    const labels = {
+        send: isHindi ? "Question Bhejein" : "Send Question",
+        loading: "Please wait...",
+        user: isHindi ? "Aap" : "You",
+        assistant: "Complaint Help",
+        failed: isHindi
+            ? "Request complete nahi hui. Login check karke retry karein."
+            : "Request failed. Check your login and retry.",
+        unreadable: isHindi
+            ? "Server response read nahi ho paya. Please retry."
+            : "Could not read the server response. Please retry."
+    };
+
+    function cleanReply(text) {
+        return text
+            .replace(/\*{1,3}/g, "")
+            .replace(/^ {0,3}#{1,6}\s+/gm, "")
+            .replace(/^\s*[-•]\s+/gm, "")
+            .trim();
+    }
+
+    function addMessage(label, text, isUser) {
+        const row = document.createElement("div");
+
+        row.className = isUser
+            ? "d-flex justify-content-end mb-3"
+            : "d-flex justify-content-start mb-3";
+
+        const bubble = document.createElement("div");
+
+        bubble.className = isUser
+            ? "rounded-4 p-3 bg-primary text-white"
+            : "rounded-4 p-3 border bg-light";
+
+        bubble.style.maxWidth = "95%";
+
+        const heading = document.createElement("div");
+        heading.className = "small mb-1";
+        heading.className += isUser ? " opacity-75" : " text-muted";
+        heading.textContent = label;
+
+        const body = document.createElement("div");
+        body.style.whiteSpace = "pre-wrap";
+        body.style.overflowWrap = "anywhere";
+        body.textContent = text;
+
+        bubble.appendChild(heading);
+        bubble.appendChild(body);
+
+        row.appendChild(bubble);
+        chat.appendChild(row);
+    }
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const question = input.value.trim();
+
+        if (!question || sendButton.disabled) {
+            return;
+        }
+
+        errorBox.textContent = "";
+        errorBox.classList.add("d-none");
+
+        sendButton.disabled = true;
+        sendButton.textContent = labels.loading;
+        form.setAttribute("aria-busy", "true");
+
+        const recentHistory = history.slice(-12);
+
+        while (
+            recentHistory.length > 0 &&
+            recentHistory.reduce(
+                (total, message) => total + message.text.length,
+                0
+            ) > 24000
+        ) {
+            recentHistory.splice(0, 2);
+        }
+
+        const data = new FormData(form);
+        data.set("question", question);
+        data.set("language", language);
+        data.set("history", JSON.stringify(recentHistory));
+
+        try {
+            const response = await fetch(endpoint, {
+                method: "POST",
+                body: data,
+                credentials: "same-origin"
+            });
+
+            let result;
+
+            try {
+                result = await response.json();
+            } catch (parseError) {
+                throw new Error(labels.unreadable);
+            }
+
+            if (
+                !response.ok ||
+                !result ||
+                typeof result.answer !== "string" ||
+                !result.answer.trim()
+            ) {
+                const message = (
+                    result &&
+                    typeof result.error === "string"
+                )
+                    ? result.error
+                    : labels.failed;
+
+                throw new Error(message);
+            }
+
+            const answer = cleanReply(result.answer);
+
+            if (!answer) {
+                throw new Error(labels.failed);
+            }
+
+            addMessage(labels.user, question, true);
+            addMessage(labels.assistant, answer, false);
+
+            history.push(
+                {
+                    role: "user",
+                    text: question
+                },
+                {
+                    role: "model",
+                    text: answer
+                }
+            );
+
+            while (history.length > 12) {
+                history.splice(0, 2);
+            }
+
+            if (input.value.trim() === question) {
+                input.value = "";
+            }
+
+            input.focus();
+
+        } catch (error) {
+            errorBox.textContent = (
+                error && error.message
+            )
+                ? error.message
+                : labels.failed;
+
+            errorBox.classList.remove("d-none");
+
+        } finally {
+            sendButton.disabled = false;
+            sendButton.textContent = labels.send;
+            form.removeAttribute("aria-busy");
+        }
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,599 @@
+{% extends "base.html" %}
+
+{% block title %}Instant Legal Help{% endblock %}
+
+{% block content %}
+<div class="container py-4 py-lg-5">
+
+    <!-- Page Heading -->
+    <div class="mb-4">
+        <div class="d-flex align-items-center gap-3 mb-2">
+            <div class="bg-primary-subtle text-primary rounded-3 p-3">
+                <!-- <i class="bi bi-scale fs-3"></i> -->
+                 <i class="bi bi-chat-dots-fill text-primary me-2"></i>
+            </div>
+
+            <div>
+                <h2 class="fw-bold mb-1">Instant Legal Help</h2>
+                <p class="text-secondary mb-0">
+                    AI-powered preliminary legal guidance and assistance.
+                </p>
+            </div>
+        </div>
+
+        <p class="text-secondary small mt-3 mb-0">
+            Describe your problem in English, Hindi, or Hinglish.
+            Guidance is for India; state-specific rules may vary.
+        </p>
+    </div>
+
+    <!-- Emergency Alert -->
+    <div class="alert alert-danger border-0 rounded-3 shadow-sm mb-3">
+        <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+
+            <div>
+                <strong>Immediate danger or serious injury?</strong>
+                Call <a href="tel:112" class="alert-link">112</a>.
+                Do not wait for an AI response.
+
+                <a href="{{ contacts.emergency.url }}"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="alert-link d-block d-md-inline ms-md-2">
+                    Official emergency service
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Notice -->
+    <div class="alert alert-light border rounded-3 small text-secondary mb-4">
+        <i class="bi bi-shield-lock me-2"></i>
+        Do not share passwords, Aadhaar numbers, bank details,
+        or unnecessary identifying information.
+        Messages are saved and sent to Gemini for generating guidance.
+    </div>
+
+    <!-- Chat Layout -->
+    <div class="row g-4">
+
+        <!-- Left: Saved Conversations -->
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-3">
+
+                    <form method="POST"
+                          action="{{ url_for('new_legal_help_conversation') }}">
+                        <input type="hidden"
+                               name="legal_help_csrf"
+                               value="{{ form_token }}">
+
+                        <button type="submit"
+                                class="btn btn-primary w-100 mb-4">
+                            <i class="bi bi-plus-lg me-2"></i>
+                            New Chat
+                        </button>
+                    </form>
+
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h6 class="fw-bold mb-0">
+                            <i class="bi bi-clock-history me-2 text-primary"></i>
+                            Previous Chats
+                        </h6>
+                    </div>
+
+                    <div class="list-group list-group-flush">
+                        {% for chat in conversations %}
+                        <a href="{{ url_for('instant_legal_help', chat_id=chat.id) }}"
+                           class="list-group-item list-group-item-action rounded-3 mb-2 border
+                                  {% if active_chat and active_chat.id == chat.id %}
+                                  active
+                                  {% endif %}"
+                           style="overflow-wrap: anywhere;">
+
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-chat-left-text mt-1
+                                          {% if active_chat and active_chat.id == chat.id %}
+                                          text-white
+                                          {% else %}
+                                          text-primary
+                                          {% endif %}"></i>
+
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold small">
+                                        {{ chat.title }}
+                                    </div>
+
+                                    <small class="{% if active_chat and active_chat.id == chat.id %}
+                                                  text-white-50
+                                                  {% else %}
+                                                  text-secondary
+                                                  {% endif %}">
+                                        {{ chat.created_at.strftime('%d %b %Y') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </a>
+                        {% else %}
+                        <p class="small text-muted mb-0">
+                            No saved conversations yet.
+                        </p>
+                        {% endfor %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Chat Area -->
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm rounded-4">
+
+                <!-- Chat Header -->
+                <div class="card-header bg-white border-bottom p-3 rounded-top-4">
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="bg-primary-subtle text-primary rounded-circle p-3">
+                            <i class="bi bi-robot fs-4"></i>
+                        </div>
+
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">
+                                AI Legal Assistant
+                            </h6>
+
+                            <small class="text-success">
+                                <i class="bi bi-circle-fill me-1"></i>
+                                Ready to assist.
+                                Please click new chat to start conversation.
+                            </small>
+                        </div>
+
+                        <span class="badge bg-primary-subtle text-primary rounded-pill">
+                            AI Powered
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body p-3 p-md-4">
+
+                    {% if active_chat %}
+
+                    <h5 class="fw-bold mb-4"
+                        style="overflow-wrap: anywhere;">
+                        {{ active_chat.title }}
+                    </h5>
+
+                    {% for item in chat_messages %}
+
+                        {% if item.message.role == 'user' %}
+
+                        <!-- User Message -->
+                        <div class="d-flex justify-content-end mb-4">
+                            <div class="bg-primary text-white rounded-4 p-3"
+                                 style="max-width: 85%; overflow-wrap: anywhere;">
+
+                                <div class="small opacity-75 mb-1">
+                                    <i class="bi bi-person-circle me-1"></i>
+                                    You
+                                </div>
+
+                                <div style="white-space: pre-wrap;">
+                                    {{ item.message.content }}
+                                </div>
+                            </div>
+                        </div>
+
+                        {% elif item.reply %}
+                            {% set reply = item.reply %}
+
+                            <!-- AI Response -->
+                            <div class="d-flex mb-4">
+                                <div class="flex-grow-1">
+
+                                    {% if reply.severity %}
+                                    {% set severity_colour = {
+                                        'CRITICAL': 'danger',
+                                        'HIGH': 'warning',
+                                        'MEDIUM': 'primary',
+                                        'LOW': 'secondary'
+                                    }.get(reply.severity, 'secondary') %}
+
+                                    <div class="mb-3">
+                                        <span class="badge bg-{{ severity_colour }}
+                                                     {% if reply.severity == 'HIGH' %}text-dark{% endif %} p-2">
+                                            <i class="bi bi-activity me-1"></i>
+                                            Severity: {{ reply.severity }}
+                                        </span>
+
+                                        <div class="small text-muted mt-1">
+                                            Preliminary AI assessment—not a guarantee of safety.
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="card border-0 shadow-sm rounded-4 mb-3">
+                                        <div class="card-header bg-white border-bottom rounded-top-4">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-robot text-primary"></i>
+                                                <strong>AI Guidance</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="card-body">
+
+                                            {% if reply.emergency %}
+                                            <div class="alert alert-danger border-0 rounded-3">
+                                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                                This may need urgent help.
+                                                If there is immediate danger, call
+                                                <a href="tel:112" class="alert-link">112</a>.
+                                            </div>
+                                            {% endif %}
+
+                                            {% if reply.follow_up_answer %}
+                                            <div class="mb-3">
+                                                <h6 class="fw-bold">
+                                                    <i class="bi bi-chat-left-text me-2"></i>
+                                                    Answer to Your Question
+                                                </h6>
+
+                                                <p class="mb-0"
+                                                   style="white-space: pre-wrap;">
+                                                    {{ reply.follow_up_answer }}
+                                                </p>
+                                            </div>
+                                            {% endif %}
+
+                                            <div class="mb-3">
+                                                <h6 class="fw-bold">
+                                                    <i class="bi bi-tag me-2"></i>
+                                                    Your Issue Category
+                                                </h6>
+
+                                                <span class="badge bg-primary text-wrap p-2">
+                                                    {{ reply.category }}
+                                                </span>
+                                            </div>
+
+                                            {% if reply.immediate_steps %}
+                                            <div class="alert alert-warning border-0 rounded-3">
+                                                <h6 class="fw-bold">
+                                                    <i class="bi bi-lightning-charge-fill me-2"></i>
+                                                    What You Should Do Immediately
+                                                </h6>
+
+                                                <ul class="mb-0">
+                                                    {% for point in reply.immediate_steps %}
+                                                    <li>{{ point }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                            {% endif %}
+
+                                            {% if reply.severity_reason %}
+                                            <div class="mb-3">
+                                                <h6 class="fw-bold">
+                                                    <i class="bi bi-info-circle me-2"></i>
+                                                    Why This Severity
+                                                </h6>
+                                                <p class="mb-0">
+                                                    {{ reply.severity_reason }}
+                                                </p>
+                                            </div>
+                                            {% endif %}
+
+                                            {% if reply.legal_rights %}
+                                            <div class="mb-3">
+                                                <h6 class="fw-bold">
+                                                    <i class="bi bi-journal-bookmark me-2"></i>
+                                                    Your Legal Rights
+                                                </h6>
+
+                                                <ul class="mb-0">
+                                                    {% for point in reply.legal_rights %}
+                                                    <li>{{ point }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                            {% endif %}
+
+                                            {% if reply.complaint_options
+                                                  or 'consumer' in reply.contact_ids %}
+
+                                            <div class="mb-3">
+                                                <h6 class="fw-bold">
+                                                    <i class="bi bi-file-earmark-text me-2"></i>
+                                                    You Can Complain Here
+                                                </h6>
+
+                                                {% if reply.complaint_options %}
+                                                <ul>
+                                                    {% for point in reply.complaint_options %}
+                                                    <li>{{ point }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                                {% endif %}
+
+                                                {% if 'consumer' in reply.contact_ids %}
+                                                <div class="border rounded-3 p-3 bg-light">
+                                                    <div class="fw-semibold">
+                                                        Official Consumer Grievance Portal
+                                                    </div>
+
+                                                    <p class="small text-muted mb-2">
+                                                        For relevant consumer complaints.
+                                                        This is a pre-litigation grievance service.
+                                                    </p>
+
+                                                    <a href="{{ contacts.consumer.url }}"
+                                                       class="btn btn-sm btn-outline-primary"
+                                                       target="_blank"
+                                                       rel="noopener noreferrer">
+                                                        Open National Consumer Helpline
+                                                    </a>
+                                                </div>
+                                                {% endif %}
+
+                                                <p class="small text-muted mt-2 mb-0">
+                                                    Local procedures and current legal provisions
+                                                    are not live-verified in this version.
+                                                </p>
+                                            </div>
+                                            {% endif %}
+
+                                            {% if reply.contact_ids %}
+                                            <div class="border rounded-3 p-3 mb-3 bg-light">
+                                                <h6 class="fw-bold">
+                                                    <i class="bi bi-telephone-fill me-2"></i>
+                                                    Helpline / Contact Number
+                                                </h6>
+
+                                                {% for contact_id in reply.contact_ids %}
+                                                    {% set contact = contacts[contact_id] %}
+
+                                                    <div class="mb-3">
+                                                        <div class="fw-semibold">
+                                                            {{ contact.name }}:
+                                                            <a href="tel:{{ contact.number }}">
+                                                                {{ contact.number }}
+                                                            </a>
+                                                        </div>
+
+                                                        <div class="small text-muted">
+                                                            {{ contact.purpose }}
+                                                        </div>
+
+                                                        <a href="{{ contact.url }}"
+                                                           target="_blank"
+                                                           rel="noopener noreferrer"
+                                                           class="small">
+                                                            Official source
+                                                        </a>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+
+                                            {% elif not reply.follow_up_answer %}
+                                            <h6 class="fw-bold">
+                                                <i class="bi bi-telephone-fill me-2"></i>
+                                                Helpline / Contact Number
+                                            </h6>
+
+                                            <p class="text-muted">
+                                                No relevant verified contact is available
+                                                in this application's directory for this response.
+                                            </p>
+                                            {% endif %}
+
+                                            {% if reply.evidence %}
+                                            <div class="mb-3">
+                                                <h6 class="fw-bold">
+                                                    <i class="bi bi-folder-check me-2"></i>
+                                                    Documents / Evidence Required
+                                                </h6>
+
+                                                <ul class="mb-0">
+                                                    {% for point in reply.evidence %}
+                                                    <li>{{ point }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                            {% endif %}
+
+                                            {% if reply.next_step %}
+                                            <div class="border rounded-3 p-3 mt-3 bg-light">
+                                                <h6 class="fw-bold">
+                                                    <i class="bi bi-arrow-right-circle me-2"></i>
+                                                    Next Step
+                                                </h6>
+                                                <p class="mb-0">
+                                                    {{ reply.next_step }}
+                                                </p>
+                                            </div>
+                                            {% endif %}
+
+                                            {% if reply.consult_lawyer %}
+                                            <div class="mb-3">
+                                                <h6 class="fw-bold">
+                                                    <i class="bi bi-person-badge me-2"></i>
+                                                    When to Consult a Lawyer
+                                                </h6>
+
+                                                <ul class="mb-0">
+                                                    {% for point in reply.consult_lawyer %}
+                                                    <li>{{ point }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                            {% endif %}
+
+                                            {% if reply.clarifying_questions %}
+                                            <div class="border-start border-primary border-3 ps-3 mt-3">
+                                                <h6 class="fw-bold">
+                                                    <i class="bi bi-question-circle me-2"></i>
+                                                    A Little More Information
+                                                </h6>
+
+                                                <ul class="mb-0">
+                                                    {% for question in reply.clarifying_questions %}
+                                                    <li>{{ question }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                            {% endif %}
+
+                                            <p class="small text-muted border-top pt-3 mt-3 mb-0">
+                                                General legal information only—not final legal advice.
+                                                AI may make mistakes. No complaint has been filed.
+                                            </p>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        {% else %}
+
+                        <div class="alert alert-warning rounded-3">
+                            <i class="bi bi-exclamation-circle me-2"></i>
+                            A saved response could not be displayed.
+                        </div>
+
+                        {% endif %}
+
+                    {% else %}
+
+                    <!-- Empty Active Chat State -->
+                    <div class="text-center py-5">
+                        <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex p-4 mb-4">
+                            <i class="bi bi-robot display-4"></i>
+                        </div>
+
+                        <h4 class="fw-bold mb-2">
+                            How can we help?
+                        </h4>
+
+                        <p class="text-secondary mx-auto">
+                            Describe your situation to begin.
+                            Mention your city/state when relevant.
+                        </p>
+
+                        <div class="bg-light rounded-4 p-3 mt-4 mx-auto">
+                            <p class="small text-secondary mb-2">
+                                You can ask about:
+                            </p>
+
+                            <div class="d-flex flex-wrap justify-content-center gap-2">
+                                <span class="badge bg-white text-primary border p-2">
+                                    Property Disputes
+                                </span>
+
+                                <span class="badge bg-white text-primary border p-2">
+                                    Cyber Crime
+                                </span>
+
+                                <span class="badge bg-white text-primary border p-2">
+                                    Family Issues
+                                </span>
+
+                                <span class="badge bg-white text-primary border p-2">
+                                    Workplace Harassment
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% endfor %}
+
+                    <!-- Message Input -->
+                    <div id="latest"></div>
+
+                    <div class="card border-0 bg-light rounded-4 mt-4">
+                        <div class="card-body p-3 p-md-4">
+                            <h6 class="fw-bold mb-3">
+                                <i class="bi bi-pencil-square me-2"></i>
+                                Continue This Conversation
+                            </h6>
+
+                            <form method="POST"
+                                  action="{{ url_for(
+                                      'send_legal_help_message',
+                                      conversation_id=active_chat.id
+                                  ) }}"
+                                  onsubmit="this.querySelector('button[type=submit]').disabled=true;">
+
+                                <input type="hidden"
+                                       name="legal_help_csrf"
+                                       value="{{ form_token }}">
+
+                                <label for="legal-help-message"
+                                       class="form-label">
+                                    Your problem or follow-up question
+                                </label>
+
+                                <textarea id="legal-help-message"
+                                          name="message"
+                                          class="form-control mb-3"
+                                          rows="3"
+                                          maxlength="4000"
+                                          placeholder="Apni problem ya agla question likhein..."
+                                          required></textarea>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-send me-2"></i>
+                                    Send Question
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    {% else %}
+
+                    <!-- No Active Chat State -->
+                    <div class="text-center py-5">
+                        <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex p-4 mb-4">
+                            <i class="bi bi-robot display-4"></i>
+                        </div>
+
+                        <h4 class="fw-bold mb-2">
+                            How can we help?
+                        </h4>
+
+                        <p class="text-secondary mx-auto">
+                            Click “New Chat” to start, or reopen a saved conversation.
+                        </p>
+
+                        <div class="bg-light rounded-4 p-3 mt-4 mx-auto">
+                            <p class="small text-secondary mb-2">
+                                You can ask about:
+                            </p>
+
+                            <div class="d-flex flex-wrap justify-content-center gap-2">
+                                <span class="badge bg-white text-primary border p-2">
+                                    Property Disputes
+                                </span>
+
+                                <span class="badge bg-white text-primary border p-2">
+                                    Cyber Crime
+                                </span>
+
+                                <span class="badge bg-white text-primary border p-2">
+                                    Family Issues
+                                </span>
+
+                                <span class="badge bg-white text-primary border p-2">
+                                    Workplace Harassment
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

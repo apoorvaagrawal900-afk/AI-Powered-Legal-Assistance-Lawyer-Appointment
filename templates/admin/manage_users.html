@@ -3,66 +3,15 @@
 {% block title %}Manage Users{% endblock %}
 
 {% block content %}
-<div class="py-5">
+<div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>👥 Manage Users</h1>
+        <h2 class="mb-0">👥 Manage Users</h2>
         <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
     </div>
     
-    <!-- Pending Approvals Section -->
-    <div class="card mb-4">
-        <div class="card-header bg-warning text-dark">
-            <h5 class="mb-0">⏳ Pending Approvals</h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Name</th>
-                        <th>Registered</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users if not user.is_approved and user.role != 'admin' %}
-                    <tr>
-                        <td>{{ user.id }}</td>
-                        <td>{{ user.email }}</td>
-                        <td>
-                            <span class="badge bg-{{ 'primary' if user.role == 'client' else 'success' }}">
-                                {{ user.role.title() }}
-                            </span>
-                        </td>
-                        <td>
-                            {% if user.role == 'client' %}
-                                {{ user.client_profile.name if user.client_profile else 'N/A' }}
-                            {% elif user.role == 'lawyer' %}
-                                {{ user.lawyer_profile.name if user.lawyer_profile else 'N/A' }}
-                            {% endif %}
-                        </td>
-                        <td>{{ user.created_at.strftime('%d %b %Y, %I:%M %p') }}</td>
-                        <td>
-                            <a href="{{ url_for('approve_user', user_id=user.id) }}" class="btn btn-sm btn-success">✓ Approve</a>
-                            <a href="{{ url_for('reject_user', user_id=user.id) }}" class="btn btn-sm btn-danger">✗ Reject</a>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="6" class="text-center text-muted">No pending approvals</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    
-    <!-- All Users Section -->
     <div class="card">
         <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">👥 All Users</h5>
+            <h5 class="mb-0">Approved Users ({{ users|length }})</h5>
         </div>
         <div class="card-body">
             <table class="table table-striped">
@@ -83,8 +32,8 @@
                         <td>{{ user.id }}</td>
                         <td>{{ user.email }}</td>
                         <td>
-                            <span class="badge bg-{{ 'primary' if user.role == 'client' else 'success' if user.role == 'lawyer' else 'danger' }}">
-                                {{ user.role.title() }}
+                            <span class="badge bg-{{ 'primary' if user.role == 'client' else 'success' }}">
+                                {{ user.role|title }}
                             </span>
                         </td>
                         <td>
@@ -92,16 +41,10 @@
                                 {{ user.client_profile.name if user.client_profile else 'N/A' }}
                             {% elif user.role == 'lawyer' %}
                                 {{ user.lawyer_profile.name if user.lawyer_profile else 'N/A' }}
-                            {% else %}
-                                Admin
                             {% endif %}
                         </td>
                         <td>
-                            {% if user.is_approved %}
-                                <span class="badge bg-success">✓ Approved</span>
-                            {% else %}
-                                <span class="badge bg-warning">⏳ Pending</span>
-                            {% endif %}
+                            <span class="badge bg-success">✓ Approved</span>
                         </td>
                         <td>
                             {% if user.is_blacklisted %}
@@ -111,22 +54,16 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if user.role != 'admin' %}
-                                {% if user.is_approved %}
-                                    <a href="{{ url_for('reject_user', user_id=user.id) }}" class="btn btn-sm btn-warning">Reject</a>
-                                {% else %}
-                                    <a href="{{ url_for('approve_user', user_id=user.id) }}" class="btn btn-sm btn-success">Approve</a>
-                                {% endif %}
-                                
-                                {% if user.is_blacklisted %}
-                                    <a href="{{ url_for('unblacklist_user', user_id=user.id) }}" class="btn btn-sm btn-success">Unblacklist</a>
-                                {% else %}
-                                    <a href="{{ url_for('blacklist_user', user_id=user.id) }}" class="btn btn-sm btn-danger">Blacklist</a>
-                                {% endif %}
+                            {% if user.is_blacklisted %}
+                                <a href="{{ url_for('unblacklist_user', user_id=user.id) }}" class="btn btn-sm btn-success">Unblacklist</a>
                             {% else %}
-                                <span class="text-muted">-</span>
+                                <a href="{{ url_for('blacklist_user', user_id=user.id) }}" class="btn btn-sm btn-danger">Blacklist</a>
                             {% endif %}
                         </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">No approved users yet</td>
                     </tr>
                     {% endfor %}
                 </tbody>

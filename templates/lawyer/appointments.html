@@ -1,42 +1,57 @@
 {% extends "base.html" %}
 
-{% block title %}Appointments{% endblock %}
+{% block title %}Appointment Requests{% endblock %}
 
 {% block content %}
-<div class="py-5">
-    <h1 class="mb-4">📅 My Appointments</h1>
+<div class="container py-4">
+    <h2 class="mb-4">⏳ Appointment Requests</h2>
     
-    <!-- Pending Requests Section -->
-    <div class="card mb-4">
+    <div class="card">
         <div class="card-header bg-warning text-dark">
-            <h5 class="mb-0">⏳ Pending Requests ({{ pending_count }})</h5>
+            <h5 class="mb-0">All Requests ({{ appointments|length }})</h5>
         </div>
         <div class="card-body">
             <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>Client</th>
+                        <th>Legal Issue</th>
                         <th>Date</th>
                         <th>Time</th>
-                        <th>Reason</th>
+                        <th>Mode</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for appointment in pending_appointments %}
+                    {% for appointment in appointments %}
                     <tr>
                         <td>{{ appointment.client.name }}</td>
+                        <td>{{ appointment.legal_issue.category if appointment.legal_issue else 'General' }}</td>
                         <td>{{ appointment.date.strftime('%d %b %Y') }}</td>
                         <td>{{ appointment.time.strftime('%I:%M %p') }}</td>
-                        <td>{{ appointment.reason[:50] }}...</td>
+                        <td>{{ appointment.mode|title }}</td>
                         <td>
-                            <a href="{{ url_for('accept_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-success">✓ Accept</a>
-                            <a href="{{ url_for('reject_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-danger">✗ Reject</a>
+                            <span class="badge bg-{{ 'warning text-dark' if appointment.status == 'pending' else 'success' if appointment.status == 'approved' else 'danger' if appointment.status == 'rejected' else 'secondary' }}">
+                                {{ appointment.status|title }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if appointment.status == 'pending' %}
+                            <form method="POST" action="{{ url_for('approve_appointment', appointment_id=appointment.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success">✓ Approve</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('reject_appointment', appointment_id=appointment.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-danger">✗ Reject</button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="text-center text-muted">No pending requests</td>
+                        <td colspan="7" class="text-center text-muted">No appointment requests yet</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -44,41 +59,8 @@
         </div>
     </div>
     
-    <!-- Accepted Appointments Section -->
-    <div class="card">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">✅ Accepted Appointments ({{ accepted_count }})</h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Client</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Reason</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for appointment in accepted_appointments %}
-                    <tr>
-                        <td>{{ appointment.client.name }}</td>
-                        <td>{{ appointment.date.strftime('%d %b %Y') }}</td>
-                        <td>{{ appointment.time.strftime('%I:%M %p') }}</td>
-                        <td>{{ appointment.reason[:50] }}...</td>
-                        <td>
-                            <span class="badge bg-success">{{ appointment.status.title() }}</span>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">No accepted appointments</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="mt-4">
+        <a href="{{ url_for('lawyer_dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
     </div>
 </div>
 {% endblock %}
